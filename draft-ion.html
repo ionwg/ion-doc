@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Ion Data Format</title>
+    <script type="text/javascript" src="assets/js/syntaxhighlighter/scripts/shCore.js"></script>
+    <script type="text/javascript" src="assets/js/syntaxhighlighter/scripts/shBrushJScript.js"></script>
+    <link type="text/css" rel="stylesheet" href="assets/js/syntaxhighlighter/styles/shCoreDefault.css"/>
+    <script type="text/javascript">SyntaxHighlighter.all();</script>
+</head>
+
+<head>
+
+</head>
+
+<body>
+    <h1>Ion</h1>
+    <h2>A simple JSON-based data format for REST APIs</h2>
+    <h3>Abstract</h3>
+    <p>This document specifies Ion, a simple <a href="http://www.json.org/">JSON</a>-based content and metadata
+        hypermedia type suitable for Web data interchange.</p>
+    <ol>
+        <li>
+            <h3>Introduction</h3>
+            <p>Ion is a JSON-based hypermedia type (document format) that represents "objects" (or collections of
+               "objects") and their corresponding metadata in a minimal manner suitable for web interchange.  An
+               "object" is simply, as defined by JSON, "an unordered set of name/value pairs."</p>
+            
+            <p>Ion's two primary representations are a single-object format with optional metadata and a
+                collection format with optional metadata.</p>
+            
+            <p>Ion's primary use case is enabling JSON-based data interchange between distributed hypermedia systems,
+               especially those supporting web-based
+                <a href="http://en.wikipedia.org/wiki/Representational_state_transfer">REST</a> architectures and
+               APIs</p>
+            
+            <ol>
+                <li>
+                    <h4>Examples</h4>
+                    <ul>
+                        <li>
+                            A single-object Ion document without metadata:
+                            <pre class="brush: js;">
+                            {
+                              "name": "Bob",
+                              "age": 24,
+                              "isRegistered": true
+                            }
+                            </pre>
+                        </li>
+                        <li>
+                            A single-object Ion document <em>with</em> metadata:
+                            <pre class="brush: js;">
+                            {
+                              "_meta": {
+                                "href": "http://myhost.com/users/Bob"
+                              },
+                              "name": "Bob",
+                              "age": 24,
+                              "isRegistered": true
+                            }
+                            </pre>
+                        </li>
+                        <li>
+                            A collection Ion document without collection metadata:
+                            <pre class="brush: js;">
+                            [
+                              {
+                                "_meta": {
+                                  "href": "http://myhost.com/users/Bob"
+                                },
+                                "name": "Bob",
+                                "age": 24,
+                                "isRegistered": true
+                              },
+                              {
+                                "_meta": {
+                                  "href": "http://myhost.com/users/Alice"
+                                },
+                                "name": "Alice",
+                                "age": 28,
+                                "isRegistered": false
+                              }
+                            ]
+                            </pre>
+                        </li>
+                        <li>
+                            A collection Ion document <em>with</em> collection metadata:
+                            <pre class="brush: js;">
+                            {
+                              "_meta": {
+                                "href": "http://myhost.com/users",
+                                "maxResults": 2,
+                                "pageIndex": 0
+                              },
+                              "_items": [
+                                {
+                                  "name": "Bob",
+                                  "age": 24,
+                                  "isRegistered": true
+                                },
+                                {
+                                  "name": "Alice",
+                                  "age": 28,
+                                  "isRegistered": false
+                                }
+                              ]
+                            }
+                            </pre>
+                        </li>
+                    </ul>
+
+
+                </li>
+
+                <li>
+                    <h4>Notational Conventions</h4>
+                    <p>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+                        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+                        document are to be interpreted as described in
+                        <a href="http://tools.ietf.org/html/bcp14">BCP 14</a>,
+                        [<a href="http://tools.ietf.org/html/rfc2119">RFC2119</a>], as scoped to those conformance
+                        targets.</p>
+                </li>
+            </ol>
+        </li>
+        
+        
+    </ol>
+
+</body>
+
+</html>
