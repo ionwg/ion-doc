@@ -1,0 +1,156 @@
+= The Ion Hypermedia Type
+Les Hazlewood <les@hazlewood.com[@lhazlewood]>
+2014-12-27
+:revdate: 2014-12-27 14:07:33 -0800
+// URIs:
+:uri-json: http://www.json.org
+:uri-rest: http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm
+:uri-rfc2119: https://tools.ietf.org/html/rfc2119
+:uri-rfc5988: http://tools.ietf.org/html/rfc5988
+
+draft-ionwg-ion-01
+
+.Abstract
+
+This document specifies Ion, a simple {uri-json}[JSON]-based content and
+metadata hypermedia type suitable for {uri-rest}[REST] resource interchange. Ion
+defines a JSON-specific way to:
+
+* Represent a resource and its metadata.
+* Represent a collection of resources and the collection's metadata.
+* Reference or {uri-rfc5988}[Link] to one resource from another.
+
+.Status
+
+This Internet-Draft is a working document of the Ion Working Group (IWG).  Note
+that other groups may also distribute working documents as Internet-Drafts.
+
+Internet-Drafts are draft documents valid for a maximum of six months
+and may be updated, replaced, or obsoleted by other documents at any
+time.  It is inappropriate to use Internet-Drafts as reference
+material or to cite them other than as "work in progress."
+
+This Internet-Draft will expire on 30 June 2015.
+
+.Copyright Notice
+
+Copyright (c) Les Hazlewood 2013-2015 and persons identified as document authors.
+All rights reserved.
+
+== Introduction
+
+Ion is a JSON-based hypermedia type (document format) that represents resources
+as JSON "objects" (or collections of "objects") and their corresponding
+metadata in a minimal manner suitable for web interchange.  An "object" is
+simply, as defined by JSON, "an unordered set of name/value pairs."
+
+Ion's two primary representations are a single-object format with optional
+metadata and a collection format with optional metadata.  {uri-rfc5988}[Links]
+from one resource to another are represented in a metadata object.
+
+Ion's primary use case is enabling JSON-based data interchange between
+distributed hypermedia systems, especially those supporting HTTP-based
+{uri-rest}[REST] architectures and APIs.
+
+=== Examples
+
+The following examples are non-normative.
+
+==== Instance Resource
+
+A single resource without metadata is simply a standard JSON document:
+
+.Ion Instance Resource Without Metadata
+[source,json]
+----
+{
+  "firstName": "Bob",
+  "lastName": "Smith",
+  "birthDate": "1980-01-23"
+}
+----
+
+A single resource with metadata is a JSON document that has a `meta`
+name/value pair.
+
+.Ion Instance Resource With Metadata
+[source,json]
+----
+{
+  "meta": {
+    "href": "https://api.example.com/users/1"
+  },
+  "firstName": "Bob",
+  "lastName": "Smith",
+  "birthDate": "1980-01-23"
+}
+----
+
+==== Collection Resource
+
+.Empty Ion Collection Resource:
+[source,json]
+----
+{
+  "meta": {
+    "href": "https://api.example.com/users"
+  },
+  "offset": 0,
+  "limit": 0,
+  "size": 0,
+  "first": { "meta": { "href": "https://api.example.com/users" } },
+  "previous": null,
+  "next": null,
+  "last": { "meta": { "href": "https://api.example.com/users" } },
+  "items": []
+}
+----
+
+.Ion Collection Resource with pagination support and referenced resources:
+[source,javascript]
+----
+{
+  "meta": {
+    "href": "https://api.example.com/users"
+  },
+  "offset": 0,
+  "limit": 25,
+  "size": 218,
+  "first": { "meta": { "href": "https://api.example.com/users" } },
+  "previous": null,
+  "next": { "meta": { "href": "https://api.example.com/users?offset=25" } },
+  "last": { "meta": { "href": "https://api.example.com/users?offset=200" } },
+  "items": [
+    {
+      "meta": {
+        "href": "https://api.example.com/users/1"
+      },
+      "firstName": "Bob",
+      "lastName": "Smith",
+      "birthDate": "1977-04-18"
+    },
+    //... items 2-24 omitted for brevity
+    {
+      "meta": {
+        "href": "https://api.example.com/users/25"
+      },
+      "firstName": "Jane",
+      "lastName": "Doe",
+      "birthDate": "1980-01-23"
+    }
+  ]
+}
+----
+
+
+
+=== Notational Conventions
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in Key
+words for use in RFCs to Indicate Requirement Levels {uri-rfc2119}[RFC2119].  If
+these words are used without being spelled in uppercase then they are
+to be interpreted with their normal natural language meanings.
+
+== Ion Documents
