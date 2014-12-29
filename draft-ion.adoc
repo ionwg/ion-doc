@@ -1,20 +1,28 @@
-= The Ion Hypermedia Types
+= The Ion Data Interchange Format
 Les Hazlewood <les@hazlewood.com[@lhazlewood]>
 2014-12-27
 :revdate: 2014-12-27 14:07:33 -0800
 :toc:
 // URIs:
-:uri-json: http://www.json.org
+:uri-json: http://tools.ietf.org/html/rfc7159
 :uri-rest: http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm
 :uri-rfc2119: https://tools.ietf.org/html/rfc2119
 :uri-rfc5988: http://tools.ietf.org/html/rfc5988
+:uri-ecmaScript-5-1: http://www.ecma-international.org/ecma-262/5.1
+:uri-ecmaScript-5-1-15-12: http://www.ecma-international.org/ecma-262/5.1/#sec-15.12
+:uri-IRIs: http://tools.ietf.org/html/rfc3987
+:uri-IRIs-3-1: http://tools.ietf.org/html/rfc3987#section-3.1
+:uri-URIs: http://tools.ietf.org/html/rfc3986
+:uri-links: http://tools.ietf.org/html/rfc5988#section-3
+:uri-IANA-consideration-guidelines: https://tools.ietf.org/html/rfc5226
 
 draft-ionwg-ion-01
 
 .Abstract
 
-This document specifies Ion, a simple {uri-json}[JSON]-based content and
-metadata hypermedia type suitable for {uri-rest}[REST] resource interchange.
+This document specifies the Ion Data Interchange Format, a simple
+{uri-json}[JSON]-based content and metadata hypermedia type suitable for data
+interchange.
 
 .Status
 
@@ -39,22 +47,34 @@ HTTP is commonly used to transfer data in many different data formats. With
 the advent of the {uri-rest}[REST] architectural style, HTTP-enabled
 applications often support {uri-json}[JSON] as data format for data exchange.
 However, JSON's simple grammar can support virtually any data model - additional
-context is required for machine HTTP clients and servers to interpret data and
+context is required for machine clients and servers to interpret data and
 metadata in important ways.
 
-Ion exists to codify specific name/value pairs within a JSON document to better
-facilitate JSON-based data and metadata exchange between HTTP clients and servers.
-As such, Ion does not define a new data grammar - it is a
+Ion exists to codify specific name/value pairs within a JSON object to better
+facilitate JSON-based data and metadata exchange between machine clients and
+servers. As such, Ion does not define a new data grammar - it is a
 Media Subtype of `application/json`.
 
-Ion defines the three following concepts in a JSON format:
+=== Terminology
 
-1. _Instance Resource_: A JSON document that primarily represents a single
-   resource and its metadata.
-2. _Collection Resource_: A JSON document that represents a collection of other
-   resources and the collection's metadata.
-3. _Link_: A JSON-specific serialization of a {uri-rfc5988}[Web Link] that
-   enables linking from one resource to another.
+These terms are defined by this specification:
+
+.Instance Resource
+A JSON object that represents a single data resource and its metadata.
+
+.Collection Resource
+A JSON object that represents a collection of other resources and the
+collection's metadata.
+
+.Metadata
+Data about a resource.
+
+.Meta Object
+A JSON object that contains resource metadata.
+
+.Link
+A JSON serialization of a {uri-links}[Web Link] that enables linking from
+one resource to another.
 
 === Media Type Name and Version
 
@@ -66,8 +86,8 @@ The Media Type name assigned for Ion Collection Resource documents is:
 
 `application/ionc+json`
 
-For convenience, this data format may be referred to as "Ion 1.0".  This
-specification uses "Ion" internally.
+For convenience, these formats may be referred to collectively as "Ion 1.0".
+This specification uses "Ion" internally.
 
 === Examples
 
@@ -75,7 +95,7 @@ The following examples are non-normative.
 
 ==== Example Instance Resources
 
-A single Ion instance resource without metadata is simply a standard JSON document:
+A single Ion instance resource without metadata is simply a standard JSON object:
 
 .Ion Instance Resource Without Metadata
 [source,json]
@@ -87,8 +107,8 @@ A single Ion instance resource without metadata is simply a standard JSON docume
 }
 ----
 
-A single Ion instance resource with metadata is a JSON document that has a `meta`
-name/value pair.
+A single Ion instance resource with metadata is a JSON object that has a direct
+child `meta` name/value pair in addition to its other member name/value pairs:
 
 .Ion Instance Resource With Metadata
 [source,json]
@@ -118,16 +138,16 @@ resources:
   "offset": 0,
   "limit": 0,
   "size": 0,
-  "first": { "meta": { "href": "https://api.example.com/users" } },
+  "first": { "meta": { "href": "https://api.example.com/users?offset=0" } },
   "previous": null,
   "next": null,
-  "last": { "meta": { "href": "https://api.example.com/users" } },
+  "last": { "meta": { "href": "https://api.example.com/users?offset=0" } },
   "items": []
 }
 ----
 
 An Ion collection resource with pagination support that represents the first
-'page' of referenced resources:
+"page" of referenced resources:
 
 .Paginated Ion Collection Resource:
 [source,javascript]
@@ -139,7 +159,7 @@ An Ion collection resource with pagination support that represents the first
   "offset": 0,
   "limit": 25,
   "size": 218,
-  "first": { "meta": { "href": "https://api.example.com/users" } },
+  "first": { "meta": { "href": "https://api.example.com/users?offset=0" } },
   "previous": null,
   "next": { "meta": { "href": "https://api.example.com/users?offset=25" } },
   "last": { "meta": { "href": "https://api.example.com/users?offset=200" } },
@@ -169,18 +189,14 @@ An Ion collection resource with pagination support that represents the first
 
 An Ion link is a JSON serialization of a {uri-rfc5988}[web link] to another
 resource. For example, assume that a user "Joe" is an employee of "Acme"
-corporation.  A link from the "Joe" resource to Joe's employer might be
+corporation.  A link within the "Joe" resource to Joe's employer might be
 represented as follows:
 
 .Ion Link from one resource to another:
 [source,javascript]
 ----
-{
-   //other fields omitted for brevity...
-   "firstName": "Joe",
-   "employer": {
-     "meta": { "href": "https://api.example.com/corporations/acme"} }
-   }
+"employer": {
+  "meta": { "href": "https://api.example.com/corporations/acme"} }
 }
 ----
 
@@ -192,3 +208,128 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 words for use in RFCs to Indicate Requirement Levels {uri-rfc2119}[RFC2119].  If
 these words are used without being spelled in uppercase then they are
 to be interpreted with their normal natural language meanings.
+
+
+== Metadata
+
+An Ion resource MAY contain a direct child _Meta Object_. If present,
+the _Meta Object_ represents data about its immediate parent Ion resource.
+The _Meta Object_ is OPTIONAL.
+
+If a _Meta Object_ is present, the resource field name MUST equal the
+case-sensitive octet sequence `meta` and the field value MUST be a non-null
+JSON object. A _Meta Object_ MUST contain one or more name/value
+pairs. Ion parsers MUST reject Ion resources where a direct child `meta` field
+exists and the field value is `null` or an empty JSON object.
+
+The field names within a _Meta Object_ MUST be unique; Ion parsers MUST either
+reject _Meta Object_ fields with duplicate field names or use a JSON
+parser that returns only the lexically last duplicate field, as specified
+in {uri-ecmaScript-5-1-15-12}[Section 15.12 (The JSON Object)] of {uri-ecmaScript-5-1}[ECMAScript 5.1].
+
+The set of fields that a _Meta Object_ must contain to be considered valid
+is resource-dependent.  In the absense of any resource-specific requirements,
+any field not understood by implementations MUST be ignored.
+
+=== Registered Metadata Field Names
+
+The following field names are registered in the IANA Ion Metadata field registry
+defined in [TBD].  None of the fields defined below are intended to be mandatory
+in all cases, but rather, provide an initial set likely to be useful for common
+use cases.
+
+==== `href`
+
+A resource's {uri-IRIs}[IRI] (Internationalized Resource Identifier).
+
+A _Link_ MUST contain an `href` field.  A _Link_ `href` IRI is the location of
+ the linked resource, called the "target IRI".
+
+A _Meta Object_ MAY contain an OPTIONAL `href` field.  If present, the
+_Meta Object_ `href` field IRI is the location of the parent resource, called
+the "context IRI". It is RECOMMENDED that a _Meta Object_ always contain an
+`href`.
+
+Note that in the common case, target IRIs and context IRIs will also be
+{uri-URIs}[URI]s (RFC 3986), because many protocols (such as HTTP) do not support
+dereferencing IRIs.  In serializations that do not support IRIs, IRIs will be
+converted to URIs according to {uri-IRIs-3-1}[RFC 3987, Section 3.1].
+
+==== `mediaType`
+
+A resource's https://tools.ietf.org/html/rfc6838[Media Type].  Use of this
+Field is OPTIONAL.
+
+
+== IANA Considerations
+
+=== Ion Metadata Field Registry
+
+This specification establishes the IANA Ion Metadata Field registry for Ion
+Metadata Field Names.  The registry records the Field Name and a reference to
+the specification that defines it.  This specification registers the Field Names
+defined in Section 2.1.
+
+Values are registered on a
+{uri-IANA-consideration-guidelines}[specification required] (RFC 5226) basis
+after a review period on the Ion Working Group (IWG)
+https://github.com/ionwg/ion-doc[ion-doc GitHub repository], on the advice of
+one or more Designated Experts. However, to allow
+for the allocation of values prior to publication, the Designated Expert(s) may
+approve registration once they are satisfied that such a specification will be
+published.
+
+Registration requests must filed as an
+https://github.com/ionwg/ion-doc/issues[ion-doc GitHub issue] for review and
+comment, with an appropriate subject (e.g., "Request to register metadata
+field: example").
+
+Within the review period, the Designated Expert(s) will either approve or deny
+the registration request, communicating this decision by closing the issue.
+Denials should include an explanation and, if applicable, suggestions as to
+how to make the request successful.  Registration requests that are undetermined
+for a period longer than 21 days can be brought to the IWG's attention using
+@mentions in a new GitHub issue for resolution.
+
+Criteria that should be applied by the Designated Expert(s) includes determining
+whether the proposed registration duplicates existing functionality, determining
+whether it is likely to be of general applicability or whether it is useful only
+for a single application, and whether the registration description is clear.
+
+IANA must only accept registry updates from the Designated Expert(s) and should
+direct all requests for registration to the GitHub issue tracker.
+
+It is suggested that multiple Designated Experts be appointed who are able to
+represent the perspectives of different applications using this specification,
+in order to enable broadly-informed review of registration decisions.  In cases
+where a registration decision could be perceived as creating a conflict of
+interest for a particular Expert, that Expert should defer to the judgment of
+the other Expert(s).
+
+Proposed registry description information:
+
+* Protocol Category: Ion
+* Registry Location: http://www.iana.org/assignments/ion
+* Webpage Title: Ion
+* Registry Name: Ion Metadata Fields
+
+==== Registration Template
+
+.Field Name:
+The name requested (e.g., "href"). This name is case-sensitive.  Names may not
+match other registered names in a case-insensitive manner unless the
+Designated Expert(s) state that there is a compelling reason to allow an
+exception in this particular case.
+
+.Field Description
+Brief description of the Field (e.g., "Resource IRI location").
+
+.Change Controller:
+For Standards Track RFCs, state "IESG".  For others, give the name of the
+responsible party.  Other details (e.g., postal address, email address, home
+page URI) may also be included.
+
+.Specification Document(s):
+Reference to the document(s) that specify the parameter, preferably including
+URI(s) that can be used to retrieve copies of the document(s).  An indication
+of the relevant sections may also be included but is not required.
