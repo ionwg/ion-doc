@@ -1,7 +1,8 @@
-= The Ion Hypermedia Type
+= The Ion Hypermedia Types
 Les Hazlewood <les@hazlewood.com[@lhazlewood]>
 2014-12-27
 :revdate: 2014-12-27 14:07:33 -0800
+:toc:
 // URIs:
 :uri-json: http://www.json.org
 :uri-rest: http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm
@@ -13,12 +14,7 @@ draft-ionwg-ion-01
 .Abstract
 
 This document specifies Ion, a simple {uri-json}[JSON]-based content and
-metadata hypermedia type suitable for {uri-rest}[REST] resource interchange. Ion
-defines a JSON-specific way to:
-
-* Represent a resource and its metadata.
-* Represent a collection of resources and the collection's metadata.
-* Reference or {uri-rfc5988}[Link] to one resource from another.
+metadata hypermedia type suitable for {uri-rest}[REST] resource interchange.
 
 .Status
 
@@ -39,26 +35,47 @@ All rights reserved.
 
 == Introduction
 
-Ion is a JSON-based hypermedia type (document format) that represents resources
-as JSON "objects" (or collections of "objects") and their corresponding
-metadata in a minimal manner suitable for web interchange.  An "object" is
-simply, as defined by JSON, "an unordered set of name/value pairs."
+HTTP is commonly used to transfer data in many different data formats. With
+the advent of the {uri-rest}[REST] architectural style, HTTP-enabled
+applications often support {uri-json}[JSON] as data format for data exchange.
+However, JSON's simple grammar can support virtually any data model - additional
+context is required for machine HTTP clients and servers to interpret data and
+metadata in important ways.
 
-Ion's two primary representations are a single-object format with optional
-metadata and a collection format with optional metadata.  {uri-rfc5988}[Links]
-from one resource to another are represented in a metadata object.
+Ion exists to codify specific name/value pairs within a JSON document to better
+facilitate JSON-based data and metadata exchange between HTTP clients and servers.
+As such, Ion does not define a new data grammar - it is a
+Media Subtype of `application/json`.
 
-Ion's primary use case is enabling JSON-based data interchange between
-distributed hypermedia systems, especially those supporting HTTP-based
-{uri-rest}[REST] architectures and APIs.
+Ion defines the three following concepts in a JSON format:
+
+1. _Instance Resource_: A JSON document that primarily represents a single
+   resource and its metadata.
+2. _Collection Resource_: A JSON document that represents a collection of other
+   resources and the collection's metadata.
+3. _Link_: A JSON-specific serialization of a {uri-rfc5988}[Web Link] that
+   enables linking from one resource to another.
+
+=== Media Type Name and Version
+
+The Media Type name assigned for Ion Instance Resource documents is:
+
+`application/ion+json`
+
+The Media Type name assigned for Ion Collection Resource documents is:
+
+`application/ionc+json`
+
+For convenience, this data format may be referred to as "Ion 1.0".  This
+specification uses "Ion" internally.
 
 === Examples
 
 The following examples are non-normative.
 
-==== Instance Resource
+==== Example Instance Resources
 
-A single resource without metadata is simply a standard JSON document:
+A single Ion instance resource without metadata is simply a standard JSON document:
 
 .Ion Instance Resource Without Metadata
 [source,json]
@@ -70,7 +87,7 @@ A single resource without metadata is simply a standard JSON document:
 }
 ----
 
-A single resource with metadata is a JSON document that has a `meta`
+A single Ion instance resource with metadata is a JSON document that has a `meta`
 name/value pair.
 
 .Ion Instance Resource With Metadata
@@ -86,7 +103,10 @@ name/value pair.
 }
 ----
 
-==== Collection Resource
+==== Example Collection Resources
+
+An empty Ion collection resource that does not currently reference other
+resources:
 
 .Empty Ion Collection Resource:
 [source,json]
@@ -106,7 +126,10 @@ name/value pair.
 }
 ----
 
-.Ion Collection Resource with pagination support and referenced resources:
+An Ion collection resource with pagination support that represents the first
+'page' of referenced resources:
+
+.Paginated Ion Collection Resource:
 [source,javascript]
 ----
 {
@@ -142,7 +165,24 @@ name/value pair.
 }
 ----
 
+==== Example Links
 
+An Ion link is a JSON serialization of a {uri-rfc5988}[web link] to another
+resource. For example, assume that a user "Joe" is an employee of "Acme"
+corporation.  A link from the "Joe" resource to Joe's employer might be
+represented as follows:
+
+.Ion Link from one resource to another:
+[source,javascript]
+----
+{
+   //other fields omitted for brevity...
+   "firstName": "Joe",
+   "employer": {
+     "meta": { "href": "https://api.example.com/corporations/acme"} }
+   }
+}
+----
 
 === Notational Conventions
 
@@ -152,5 +192,3 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 words for use in RFCs to Indicate Requirement Levels {uri-rfc2119}[RFC2119].  If
 these words are used without being spelled in uppercase then they are
 to be interpreted with their normal natural language meanings.
-
-== Ion Documents
