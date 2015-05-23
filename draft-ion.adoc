@@ -59,6 +59,12 @@ Media Subtype of `application/json`.
 
 These terms are defined by this specification:
 
+.Metadata
+Data about a resource.
+
+.Meta Object
+A JSON object that contains resource metadata.
+
 .Instance Resource
 A JSON object that represents a single data resource and its metadata.
 
@@ -66,25 +72,15 @@ A JSON object that represents a single data resource and its metadata.
 A JSON object that represents a collection of other resources and the
 collection's metadata.
 
-.Metadata
-Data about a resource.
-
-.Meta Object
-A JSON object that contains resource metadata.
-
 .Link
 A JSON serialization of a {uri-links}[Web Link] that enables linking from
 one resource to another.
 
 === Media Type Name and Version
 
-The Media Type name assigned for Ion Instance Resource documents is:
+The Media Type name assigned for Ion documents is:
 
 `application/ion+json`
-
-The Media Type name assigned for Ion Collection Resource documents is:
-
-`application/ionc+json`
 
 For convenience, these formats may be referred to collectively as "Ion 1.0".
 This specification uses "Ion" internally.
@@ -97,7 +93,7 @@ The following examples are non-normative.
 
 A single Ion instance resource without metadata is simply a standard JSON object:
 
-.Ion Instance Resource Without Metadata
+.Example Ion Instance Resource Without Metadata
 [source,json]
 ----
 {
@@ -110,7 +106,7 @@ A single Ion instance resource without metadata is simply a standard JSON object
 A single Ion instance resource with metadata is a JSON object that has a direct
 child `meta` name/value pair in addition to its other member name/value pairs:
 
-.Ion Instance Resource With Metadata
+.Example Ion Instance Resource With Metadata
 [source,json]
 ----
 {
@@ -125,44 +121,50 @@ child `meta` name/value pair in addition to its other member name/value pairs:
 
 ==== Example Collection Resources
 
-An empty Ion collection resource that does not currently reference other
-resources:
+An Ion collection resource is an Ion resource with:
 
-.Empty Ion Collection Resource:
+1. a `collection` value in the `meta` object's `rel` (relation) array.
+1. An `items` array.
+
+An example Ion collection resource that does not currently reference other resources:
+
+.Example Empty Ion Collection Resource:
 [source,json]
 ----
 {
   "meta": {
-    "href": "https://api.example.com/users"
+    "href": "https://api.example.com/users",
+    "rel": ["collection"]
   },
   "offset": 0,
   "limit": 0,
   "size": 0,
-  "first": { "meta": { "href": "https://api.example.com/users?offset=0" } },
+  "first": { "meta": { "href": "https://api.example.com/users?offset=0", "rel": ["collection"] } },
   "previous": null,
   "next": null,
-  "last": { "meta": { "href": "https://api.example.com/users?offset=0" } },
+  "last": { "meta": { "href": "https://api.example.com/users?offset=0", "rel": ["collection"] } },
   "items": []
 }
 ----
 
-An Ion collection resource with pagination support that represents the first
+An example Ion collection resource with pagination support that represents the first
 "page" of referenced resources:
 
-.Paginated Ion Collection Resource:
+.Example Paginated Ion Collection Resource:
 [source,javascript]
 ----
 {
   "meta": {
-    "href": "https://api.example.com/users"
+    "href": "https://api.example.com/users",
+    "rel": ["collection"]
   },
   "offset": 0,
   "limit": 25,
   "size": 218,
-  "first": { "meta": { "href": "https://api.example.com/users?offset=0" } },
+  "first": { "meta": { "href": "https://api.example.com/users?offset=0", "rel": ["collection"] } },
   "previous": null,
-  "next": { "meta": { "href": "https://api.example.com/users?offset=25" } },
-  "last": { "meta": { "href": "https://api.example.com/users?offset=200" } },
+  "next": { "meta": { "href": "https://api.example.com/users?offset=25", "rel": ["collection"] } },
+  "last": { "meta": { "href": "https://api.example.com/users?offset=200", "rel": ["collection"] } },
   "items": [
     {
       "meta": {
@@ -217,7 +219,7 @@ the _Meta Object_ represents data about its immediate parent Ion resource.
 The _Meta Object_ is OPTIONAL.
 
 If a _Meta Object_ is present, the resource field name MUST equal the
-case-sensitive octet sequence `meta` and the field value MUST be a non-null
+case-sensitive octet sequence `meta` and the field value MUST be a non-null, non-empty
 JSON object. A _Meta Object_ MUST contain one or more name/value
 pairs. Ion parsers MUST reject Ion resources where a direct child `meta` field
 exists and the field value is `null` or an empty JSON object.
@@ -259,6 +261,14 @@ converted to URIs according to {uri-IRIs-3-1}[RFC 3987, Section 3.1].
 
 A resource's https://tools.ietf.org/html/rfc6838[Media Type].  Use of this
 Field is OPTIONAL.
+
+==== `rel`
+
+An array of IANA http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1[Link Relation Type]s.
+
+A _Link_ MAY contain a `rel` field.  
+
+A _Link_ to an ION collection resource MUST contain a `rel` field that has at least the `collection` relation specified.
 
 
 == IANA Considerations
