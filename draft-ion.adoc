@@ -8,6 +8,9 @@ Les Hazlewood <les@hazlewood.com[@lhazlewood]>
 :uri-rest: http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm
 :uri-rfc2119: https://tools.ietf.org/html/rfc2119
 :uri-rfc5988: http://tools.ietf.org/html/rfc5988
+:uri-rfc5988-links: https://tools.ietf.org/html/rfc5988#section-3
+:uri-rfc5988-linkRelType: https://tools.ietf.org/html/rfc5988#section-4
+:uri-linkRelType-item: http://tools.ietf.org/html/rfc6573#section-2.1
 :uri-ecmaScript-5-1: http://www.ecma-international.org/ecma-262/5.1
 :uri-ecmaScript-5-1-15-12: http://www.ecma-international.org/ecma-262/5.1/#sec-15.12
 :uri-IRIs: http://tools.ietf.org/html/rfc3987
@@ -15,14 +18,15 @@ Les Hazlewood <les@hazlewood.com[@lhazlewood]>
 :uri-URIs: http://tools.ietf.org/html/rfc3986
 :uri-links: http://tools.ietf.org/html/rfc5988#section-3
 :uri-IANA-consideration-guidelines: https://tools.ietf.org/html/rfc5226
+:uri-semver: http://semver.org
 
 draft-ionwg-ion-01
 
 .Abstract
 
 This document specifies the Ion Data Interchange Format, a simple
-{uri-json}[JSON]-based content and metadata hypermedia type suitable for data
-interchange.
+{uri-json}[JSON]-based content and metadata hypermedia type designed to be easily understood by humans and
+effective for machine data interchange.
 
 .Status
 
@@ -52,48 +56,56 @@ metadata in important ways.
 
 Ion exists to codify specific name/value pairs within a JSON object to better
 facilitate JSON-based data and metadata exchange between machine clients and
-servers. As such, Ion does not define a new data grammar - it is a
-Media Subtype of `application/json`.
+servers while still being easy to read and understand by humans. As such, Ion
+does not define a new data grammar - it is a Media Subtype of `application/json`.
 
 === Terminology
 
 These terms are defined by this specification:
 
 .Metadata
-Data about a resource.
+A set of data that provides information about other data.
 
 .Meta Object
-A JSON object that contains resource metadata.
+A JSON object that represents metadata.
 
-.Instance Resource
-A JSON object that represents a single data resource and its metadata.
+.Root Object
+The single JSON object at the root of an Ion content structure.
+
+.Ion Object
+A JSON object that has a Meta Object field.
+
+.Resource
+An Ion Object that has one or more name/value pairs in addition to the Meta Object field.
 
 .Collection Resource
-A JSON object that represents a collection of other resources and the
-collection's metadata.
+A Resource that represents a collection of other Resources.
 
 .Link
-A JSON serialization of a {uri-links}[Web Link] that enables linking from
-one resource to another.
+An Ion Object representation of a {uri-links}[Web Link] that enables linking from one Resource to another.
 
 === Media Type Name and Version
 
-The Media Type name assigned for Ion documents is:
+The Media Type name assigned for Ion content is:
 
 `application/ion+json`
 
-For convenience, these formats may be referred to collectively as "Ion 1.0".
-This specification uses "Ion" internally.
+This format may be referred to as "Ion 1.0". This specification uses "Ion" internally.
+
+Any future version will be represented with a media type parameter named `v` with a {uri-semver}[semantic version]
+value.  For example (non-normative):
+
+`application/ion+json;v=2`
 
 === Examples
 
 The following examples are non-normative.
 
-==== Example Instance Resources
+==== Example Resources
 
-A single Ion instance resource without metadata is simply a standard JSON object:
+A JSON object without metadata is treated like any standard JSON object:
 
-.Example Ion Instance Resource Without Metadata
+.Example JSON Object Without Metadata
 [source,json]
 ----
 {
@@ -103,10 +115,10 @@ A single Ion instance resource without metadata is simply a standard JSON object
 }
 ----
 
-A single Ion instance resource with metadata is a JSON object that has a direct
-child `meta` name/value pair in addition to its other member name/value pairs:
+An Ion _Resource_ is a JSON object with a `meta` object field in addition to one or more other member name/value
+pairs:
 
-.Example Ion Instance Resource With Metadata
+.Example Ion Resource
 [source,json]
 ----
 {
@@ -121,64 +133,47 @@ child `meta` name/value pair in addition to its other member name/value pairs:
 
 ==== Example Collection Resources
 
-An Ion collection resource is an Ion resource with:
+An Ion Collection Resource is an Ion Resource that has a named `items` array field.
 
-1. a `collection` value in the `meta` object's `rel` (relation) array.
-1. An `items` array.
-
-An example Ion collection resource that does not currently reference other resources:
+An example empty Ion Collection Resource:
 
 .Example Empty Ion Collection Resource:
 [source,json]
 ----
 {
   "meta": {
-    "href": "https://api.example.com/users",
-    "rel": ["collection"]
+    "href": "https://api.example.com/users"
   },
-  "offset": 0,
-  "limit": 0,
-  "size": 0,
-  "first": { "meta": { "href": "https://api.example.com/users?offset=0", "rel": ["collection"] } },
-  "previous": null,
-  "next": null,
-  "last": { "meta": { "href": "https://api.example.com/users?offset=0", "rel": ["collection"] } },
   "items": []
 }
 ----
 
-An example Ion collection resource with pagination support that represents the first
-"page" of referenced resources:
+Ion Collection Resources also support pagination, for example:
 
 .Example Paginated Ion Collection Resource:
 [source,javascript]
 ----
 {
   "meta": {
-    "href": "https://api.example.com/users",
-    "rel": ["collection"]
+    "href": "https://api.example.com/users"
   },
   "offset": 0,
   "limit": 25,
   "size": 218,
-  "first": { "meta": { "href": "https://api.example.com/users?offset=0", "rel": ["collection"] } },
+  "first": { "meta": { "href": "https://api.example.com/users", "rel": ["collection"] } },
   "previous": null,
   "next": { "meta": { "href": "https://api.example.com/users?offset=25", "rel": ["collection"] } },
   "last": { "meta": { "href": "https://api.example.com/users?offset=200", "rel": ["collection"] } },
   "items": [
     {
-      "meta": {
-        "href": "https://api.example.com/users/1"
-      },
+      "meta": { "href": "https://api.example.com/users/1" },
       "firstName": "Bob",
       "lastName": "Smith",
       "birthDate": "1977-04-18"
     },
     //... items 2-24 omitted for brevity
     {
-      "meta": {
-        "href": "https://api.example.com/users/25"
-      },
+      "meta": { "href": "https://api.example.com/users/25" },
       "firstName": "Jane",
       "lastName": "Doe",
       "birthDate": "1980-01-23"
@@ -189,7 +184,7 @@ An example Ion collection resource with pagination support that represents the f
 
 ==== Example Links
 
-An Ion link is a JSON serialization of a {uri-rfc5988}[web link] to another
+An Ion Link is an Ion Object representation of a {uri-rfc5988}[web link] to another
 resource. For example, assume that a user "Joe" is an employee of "Acme"
 corporation.  A link within the "Joe" resource to Joe's employer might be
 represented as follows:
@@ -198,7 +193,7 @@ represented as follows:
 [source,javascript]
 ----
 "employer": {
-  "meta": { "href": "https://api.example.com/corporations/acme"} }
+    "meta": { "href": "https://api.example.com/corporations/acme" } }
 }
 ----
 
@@ -212,6 +207,17 @@ these words are used without being spelled in uppercase then they are
 to be interpreted with their normal natural language meanings.
 
 
+[[content-structure]]
+== Content Structure
+
+Ion content MUST have exactly one root JSON object, called the _Root Object_.  The Root Object may contain
+name/value pairs and any level of nested JSON objects.
+
+The Root Object and any nested JSON object with a Meta Object as defined in <<metadata,Metadata>> is called a _Resource_.
+
+An Ion Collection Resource is a Resource that has an `items` array field.  Ion Collection Resources are defined below.
+
+[[metadata]]
 == Metadata
 
 An Ion resource MAY contain a direct child _Meta Object_. If present,
@@ -233,7 +239,86 @@ The set of fields that a _Meta Object_ must contain to be considered valid
 is resource-dependent.  In the absense of any resource-specific requirements,
 any field not understood by implementations MUST be ignored.
 
-=== Registered Metadata Field Names
+[[links]]
+== Links
+
+An Ion Link is an Ion Object representation of a {uri-rfc5988}[web link] to another resource.
+
+An Ion Link is a JSON object that:
+
+- has a field named `meta` with a non-null <<metadata, Meta Object>> value
+- the `meta` object has an `href` field with with a non-null, non-empty {uri-IRIs}[IRI] string value.
+
+Ion parsers MUST identify any matching JSON structure as an Ion Link.  Anything that does not match this structure
+MUST NOT be considered an Ion Link.
+
+A non-normative example of a minimal Ion link:
+
+.Example simplest Ion link:
+[source,javascript]
+----
+{ "meta": { "href": "https://api.example.com/corporations/acme" } } }
+----
+
+The example shows the {uri-rfc5988}[web link] composite parts:
+
+* The link {uri-rfc5988-links}[context IRI] is _implicit_: it is obtained from the first ancestor JSON Object that contains a `meta` object with an `href` value.  If no ancestor object `meta` `href` is found, the context IRI is assumed to be the IRI used to obtain the Ion content.
+* The link {uri-rfc5988-linkRelType}[relation type] is _implicit_: it is the field name itself (`employer`).
+* The link {uri-rfc5988-links}[target IRI] is the `employer` object's `meta` object's `href` field value.
+
+=== Link Relation Types
+
+All Ion links have one or more <<links, link relation types>>.  A link's total set of link relation types is the set union of the link's implicit link relation type and the link's explicit link relation types.
+
+==== Implicit Link Relation Type
+
+All Ion links have exactly one implicit link relation type.  The implicit link relation type can be one of three possible values depending on where the link is located in the Ion content:
+
+1. Root object
+1. Named link
+1. Collection resource `items` array element
+
+Every Ion link has at least one implicit link relation type - the JSON field name assigned to the link object.
+
+A non-normative example of an Ion link with an implicit link relation type:
+
+[source,javascript]
+----
+"employer": {
+  "meta": { "href": "https://api.example.com/corporations/acme" } }
+}
+----
+
+The above example is a named Ion link - the name of `employer` is assigned to a Ion link object.  The field name
+`employer` is always an implicit link relation type for the associated link.
+
+===== Implicit Collection Item Link Relation Type
+
+Any Ion object in a Collection Resource's `items` array is always implicitly assigned the {uri-linkRelType-item}[`item`] link relation type.
+
+==== Explicit Link Relation Types
+
+An Ion link MAY have one or more explicitly defined link relation types declared as an array of strings assigned to the link meta object's `rel` field.
+
+A non-normative example of a link with an explicitly defined link relation type:
+
+.Example Ion link with explicit link relation type:
+[source,javascript]
+----
+"icon": {
+  "meta": { "href": "https://cdn.example.com/example.ico", "rel": ["icon"] } }
+}
+----
+
+The above example has an explicit link relation type of `icon`.
+
+More than one explicit link relation type MAY be defined in the `rel` array.
+
+Ion parsers MUST treat null or empty `rel` values as if the `rel` property was not defined at all.
+
+An implicit link relation type is the JSON field name assigned to the link object.
+
+== Registered Metadata Field Names
 
 The following field names are registered in the IANA Ion Metadata field registry
 defined in [TBD].  None of the fields defined below are intended to be mandatory
@@ -266,10 +351,9 @@ Field is OPTIONAL.
 
 An array of IANA http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1[Link Relation Type]s.
 
-A _Link_ MAY contain a `rel` field.  
+A _Link_ MAY contain a `rel` field.
 
 A _Link_ to an ION collection resource MUST contain a `rel` field that has at least the `collection` relation specified.
-
 
 == IANA Considerations
 
