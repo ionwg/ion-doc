@@ -63,26 +63,29 @@ does not define a new data grammar - it is a Media Subtype of `application/json`
 
 These terms are defined by this specification:
 
+.Member
+A JSON name/value pair as defined in https://tools.ietf.org/html/rfc7159#section-4[RFC 7159].
+
 .Metadata
 A set of data that provides information about other data.
 
 .Meta Object
-A JSON object that represents metadata.
+A JSON object with one or more members that all represent Metadata.
 
 .Root Object
 The single JSON object at the root of an Ion content structure.
 
 .Ion Object
-A JSON object that has a Meta Object field.
+A JSON object with a Meta Object member named `meta`.
 
 .Resource
-An Ion Object that has one or more name/value pairs in addition to the Meta Object field.
+An Ion Object that has one or more members in addition to its `meta` member.
 
 .Collection Resource
-A Resource that represents a collection of other Resources.
+A Resource that has an array member named `items` in addition to its `meta` member.
 
 .Link
-An Ion Object representation of a {uri-links}[Web Link] that enables linking from one Resource to another.
+An Ion Object where its `meta` member contains an {uri-IRIs}[IRI] member named `href`.  This is the Ion representation of a {uri-links}[Web Link] that enables linking from one Resource to another.
 
 === Media Type Name and Version
 
@@ -133,7 +136,7 @@ pairs:
 
 ==== Example Collection Resources
 
-An Ion Collection Resource is an Ion Resource that has a named `items` array field.
+An Ion Collection Resource is an Ion Resource that has an array member named `items`.
 
 An example empty Ion Collection Resource:
 
@@ -210,21 +213,16 @@ to be interpreted with their normal natural language meanings.
 [[content-structure]]
 == Content Structure
 
-Ion content MUST have exactly one root JSON object, called the _Root Object_.  The Root Object may contain
-name/value pairs and any level of nested JSON objects.
-
-The Root Object and any nested JSON object with a Meta Object as defined in <<metadata,Metadata>> is called a _Resource_.
-
-An Ion Collection Resource is a Resource that has an `items` array field.  Ion Collection Resources are defined below.
+Ion content MUST have exactly one root JSON object, called the _Root Object_.  The Root Object MAY contain
+name/value pairs called 'members' and any level of nested JSON objects.
 
 [[metadata]]
 == Metadata
 
-An Ion resource MAY contain a direct child _Meta Object_. If present,
-the _Meta Object_ represents data about its immediate parent Ion resource.
-The _Meta Object_ is OPTIONAL.
+An JSON object MAY contain a direct child _Meta Object_ member named `meta`. If present,
+the _Meta Object_ represents data about its immediate parent JSON object. The _Meta Object_ is OPTIONAL.
 
-If a _Meta Object_ is present, the resource field name MUST equal the
+If a Meta Object member is present, the member name MUST equal the
 case-sensitive octet sequence `meta` and the field value MUST be a non-null, non-empty
 JSON object. A _Meta Object_ MUST contain one or more name/value
 pairs. Ion parsers MUST reject Ion resources where a direct child `meta` field
@@ -242,15 +240,9 @@ any field not understood by implementations MUST be ignored.
 [[links]]
 == Links
 
-An Ion Link is an Ion Object representation of a {uri-rfc5988}[web link] to another resource.
+An Ion Link is an Ion Object where its `meta` member contains an {uri-IRIs}[IRI] member named `href`. An Ion Link is therefore JSON serialization of a {uri-rfc5988}[web link] to another resource.
 
-An Ion Link is a JSON object that:
-
-- has a field named `meta` with a non-null <<metadata, Meta Object>> value
-- the `meta` object has an `href` field with with a non-null, non-empty {uri-IRIs}[IRI] string value.
-
-Ion parsers MUST identify any matching JSON structure as an Ion Link.  Anything that does not match this structure
-MUST NOT be considered an Ion Link.
+Ion parsers MUST identify any JSON structure matching this definition as an Ion Link.  Anything that does not match this defined structure MUST NOT be considered an Ion Link.
 
 A non-normative example of a minimal Ion link:
 
@@ -260,12 +252,6 @@ A non-normative example of a minimal Ion link:
 { "meta": { "href": "https://api.example.com/corporations/acme" } } }
 ----
 
-The example shows the {uri-rfc5988}[web link] composite parts:
-
-* The link {uri-rfc5988-links}[context IRI] is _implicit_: it is obtained from the first ancestor JSON Object that contains a `meta` object with an `href` value.  If no ancestor object `meta` `href` is found, the context IRI is assumed to be the IRI used to obtain the Ion content.
-* The link {uri-rfc5988-linkRelType}[relation type] is _implicit_: it is the field name itself (`employer`).
-* The link {uri-rfc5988-links}[target IRI] is the `employer` object's `meta` object's `href` field value.
-
 === Link Relation Types
 
 All Ion links have one or more <<links, link relation types>>.  A link's total set of link relation types is the set union of the link's implicit link relation type and the link's explicit link relation types.
@@ -274,27 +260,69 @@ All Ion links have one or more <<links, link relation types>>.  A link's total s
 
 All Ion links have exactly one implicit link relation type.  The implicit link relation type can be one of three possible values depending on where the link is located in the Ion content:
 
-1. Root object
-1. Named link
-1. Collection resource `items` array element
+1. Root Object
+1. Named Link
+1. Collection Resource `items` array element
 
-Every Ion link has at least one implicit link relation type - the JSON field name assigned to the link object.
+===== Root Object Implicit Link Relation Type
 
-A non-normative example of an Ion link with an implicit link relation type:
+If the Root Object is also found to be an Ion Link, it has an implicit link relation type of `self`.
+
+A non-normative example of a Root Object that is also an Ion Link:
 
 [source,javascript]
 ----
-"employer": {
-  "meta": { "href": "https://api.example.com/corporations/acme" } }
+{
+  "meta": {
+    "href": "https://api.example.com/users/1"
+  },
+  "name": "Joe"
 }
 ----
 
-The above example is a named Ion link - the name of `employer` is assigned to a Ion link object.  The field name
-`employer` is always an implicit link relation type for the associated link.
+===== Named Link Implicit Link Relation Type
 
-===== Implicit Collection Item Link Relation Type
+If a JSON object member value is an Ion Link, the Ion Link is implicitly assigned a relation type that equals the member name.
 
-Any Ion object in a Collection Resource's `items` array is always implicitly assigned the {uri-linkRelType-item}[`item`] link relation type.
+[source,javascript]
+----
+A non-normative example:
+
+{
+  "employer": {
+    "meta": {
+      "href": "https://api.example.com/corporations/acme"
+    }
+  }
+}
+----
+
+The above example shows an Ion Link member named `employer`.  The octet sequence `employer` is therefore assigned as the link's implicit link relation type.
+
+===== Collection Item Implicit Link Relation Type
+
+Any Ion Link in a Collection Resource's `items` array is always implicitly assigned the {uri-linkRelType-item}[`item`] link relation type.
+
+[source,javascript]
+----
+A non-normative example:
+
+{
+  "meta": {
+    "href": "https://api.example.com/users"
+  },
+  "items": [
+    {
+      "meta": { "href": "https://api.example.com/users/1" }
+    },
+    {
+      "meta": { "href": "https://api.example.com/users/2" }
+    }
+  ]
+}
+----
+
+The above example has 2 Ion Links in its `items` array.  Each of these 2 links are implicitly assigned the {uri-linkRelType-item}[`item`] link relation type.
 
 ==== Explicit Link Relation Types
 
@@ -353,7 +381,7 @@ An array of IANA http://www.iana.org/assignments/link-relations/link-relations.x
 
 A _Link_ MAY contain a `rel` field.
 
-A _Link_ to an ION collection resource MUST contain a `rel` field that has at least the `collection` relation specified.
+A _Link_ to an Ion collection resource MUST contain a `rel` field that has at least the `collection` relation specified.
 
 == IANA Considerations
 
