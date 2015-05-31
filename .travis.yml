@@ -4,6 +4,9 @@ rvm:
 branches:
   only:
   - master
+before_script:
+  - gem install asciidoctor
+  - gem install pygments.rb
 script: ./deploy.sh
 
 # GitHub Token configuration for deploying the Ion Doc static site to ionwg.github.io
