@@ -1,8 +1,8 @@
 #!/bin/bash
 
 set -e # exit with nonzero exit code if anything fails
-#set -x
-#set -v
+
+# we're using Travis's before_script config instaed of doing the (now commented) check-then-install logic below:
 
 #asciidoctor_installed=$(gem list -i asciidoctor)
 #pygments_installed=$(gem list -i pygments)
@@ -20,8 +20,3 @@ set -e # exit with nonzero exit code if anything fails
 #fi
 
 asciidoctor --safe -D build draft-ion.adoc
-
-#set +v
-#set +x
-
-#rake foo
