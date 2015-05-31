@@ -7,14 +7,20 @@ asciidoctor_installed=$(gem list -i asciidoctor)
 pygments_installed=$(gem list -i pygments)
 
 if [ ! $asciidoctor_installed ]; then
+    printf '%s\n' "Installing asciidoctor"
     gem install asciidoctor
+    printf '%s\n' "Installed asciidoctor"
 fi
 
 if [ ! $pygments_installed ]; then
+    printf '%s\n' "Installing pygments"
     gem install pygments.rb
+    printf '%s\n' "Installed pygments"
 fi
 
+printf '%s\n' "Running asciidoctor"
 asciidoctor --safe -D build draft-ion.adoc
+printf '%s\n' "Ran asciidoctor"
 
 set +x
 
