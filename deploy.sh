@@ -11,6 +11,7 @@ mkdir build;
 repo="${GITHUB_REPO}"
 
 #printf '%s\n' "Github repo is $repo"
+printf '%s\n' "GIT_EMAIL is ${GIT_EMAIL}"
 
 # If GITHUB_REPO is an ssh URI, change it to the GitHub equivalent https URL:
 repo=$(echo "$repo" | sed 's/^git@github.com:/https:\/\/github.com\//')
@@ -39,7 +40,7 @@ cd build
 git init
 
 git config --list --global | grep user
-git config --list --local | grep user
+#git config --list --local | grep user
 
 # inside this git repo we'll pretend to be a new user
 git config user.email "${GIT_EMAIL}"
@@ -59,7 +60,7 @@ printf '%s\n' "Committed to local git repo"
 # repo's master branch. (All previous history on the remote master branch
 # will be lost, since we are overwriting it.) We redirect any output to
 # /dev/null to hide any sensitive credential data that might otherwise be exposed.
-git push --force --quiet "$repo" master:master > /dev/null 2>&1
+#git push --force --quiet "$repo" master:master > /dev/null 2>&1
 
 set +x
 set +v
