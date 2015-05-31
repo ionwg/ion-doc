@@ -1,6 +1,8 @@
 #!/bin/bash
 
 set -e # exit with nonzero exit code if anything fails
+set -v
+set -x
 
 # clear and re-create the build directory
 rm -rf build || exit 0;
@@ -36,17 +38,28 @@ fi
 cd build
 git init
 
+git config --list --global | grep user
+git config --list --local | grep user
+
 # inside this git repo we'll pretend to be a new user
-git config user.name "Travis CI on behalf of ${GIT_EMAIL}"
 git config user.email "${GIT_EMAIL}"
+git config user.name "Travis CI on behalf of ${GIT_EMAIL}"
+
+git config --list --global | grep user
+git config --list --local | grep user
 
 # The first and only commit to this new Git repo contains all the
 # files present with the commit message "Deploy to GitHub Pages".
 git add .
 git commit -m "Deploy to GitHub Pages"
 
+printf '%s\n' "Committed to local git repo"
+
 # Force push from the current repo's master branch to the remote
 # repo's master branch. (All previous history on the remote master branch
 # will be lost, since we are overwriting it.) We redirect any output to
 # /dev/null to hide any sensitive credential data that might otherwise be exposed.
 git push --force --quiet "$repo" master:master > /dev/null 2>&1
+
+set +x
+set +v
