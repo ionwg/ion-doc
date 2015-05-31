@@ -6,14 +6,37 @@ set -e # exit with nonzero exit code if anything fails
 rm -rf build || exit 0;
 mkdir build;
 
-repo="${GITHUB_REPO}"
+REPO="${GITHUB_REPO}"
+EMAIL="${GIT_EMAIL}"
+TOKEN="${GH_TOKEN}"
+
+if [ -z "${REPO}" ]; then
+    REPO="git@github.com:ionwg/ionwg.github.io.git"
+    printf '%s\n' "GITHUB_REPO value not set - using default value ${REPO}"
+fi
+if [ -z "${EMAIL}" ]; then
+    EMAIL=$(git config user.email)
+    if [ -z "${EMAIL}" ]; then
+        printf '%s\n' "Required GIT_EMAIL or 'git config user.email' value has not been set."
+        exit 1;
+    fi
+    printf '%s\n' "GIT_EMAIL value not set - defaulting to output of 'git config user.email': ${EMAIL}"
+fi
+if [ -z "${TOKEN}" ]; then
+    TOKEN=$(git config --local github.token)
+    if [ -z "${TOKEN}" ]; then
+        printf '%s\n' "Required GIT_EMAIL or 'git config --local github.token' value has not been set."
+        exit 1;
+    fi
+    printf '%s\n' "GH_TOKEN value not set - defaulting to output of 'git config --local github.token': <hidden>"
+fi
 
 # If GITHUB_REPO is an ssh URI, change it to the GitHub equivalent https URL:
-repo=$(echo "$repo" | sed 's/^git@github.com:/https:\/\/github.com\//')
+REPO=$(echo "${REPO}" | sed 's/^git@github.com:/https:\/\/github.com\//')
 # now ensure that the https:// scheme prefix is stripped so we can add in the token:
-repo=$(echo "$repo" | sed 's/^https:\/\///')
+REPO=$(echo "${REPO}" | sed 's/^https:\/\///')
 # now add in the scheme and token:
-repo="https://${GH_TOKEN}@$repo"
+REPO="https://${TOKEN}@${REPO}"
 
 # run our build script - this will create the rendered HTML that we'll push to the site
 ./build.sh
@@ -30,8 +53,8 @@ cd build
 git init
 
 # inside this git repo we'll pretend to be a new user
-git config user.email "${GIT_EMAIL}"
-git config user.name "Travis CI on behalf of ${GIT_EMAIL}"
+git config user.email "${EMAIL}"
+git config user.name "Travis CI on behalf of ${EMAIL}"
 
 # The first and only commit to this new Git repo contains all the
 # files present with the commit message "Deploy to GitHub Pages".
@@ -42,4 +65,4 @@ git commit -m "Deploy to GitHub Pages"
 # repo's master branch. (All previous history on the remote master branch
 # will be lost, since we are overwriting it.) We redirect any output to
 # /dev/null to hide any sensitive credential data that might otherwise be exposed.
-git push --force --quiet "$repo" master:master > /dev/null 2>&1
+git push --force --quiet "${REPO}" master:master > /dev/null 2>&1
