@@ -10,6 +10,8 @@ Les Hazlewood <les@hazlewood.com[@lhazlewood]>
 :uri-rfc5988: http://tools.ietf.org/html/rfc5988
 :uri-rfc5988-links: https://tools.ietf.org/html/rfc5988#section-3
 :uri-rfc5988-linkRelType: https://tools.ietf.org/html/rfc5988#section-4
+:uri-mediaType-namingReqs: https://tools.ietf.org/html/rfc6838#section-4.2
+:uri-rfc-json-value: https://tools.ietf.org/html/rfc7159#section-3
 :uri-linkRelType-item: http://tools.ietf.org/html/rfc6573#section-2.1
 :uri-ecmaScript-5-1: http://www.ecma-international.org/ecma-262/5.1
 :uri-ecmaScript-5-1-15-12: http://www.ecma-international.org/ecma-262/5.1/#sec-15.12
@@ -24,9 +26,8 @@ draft-ionwg-ion-01
 
 .Abstract
 
-This document specifies the Ion Data Interchange Format, a simple
-{uri-json}[JSON]-based content and metadata hypermedia type designed to be easily understood by humans and
-effective for machine data interchange.
+This document specifies the Ion Data Interchange Format, a simple human-friendly
+{uri-json}[JSON]-based hypermedia type for machine data interchange.
 
 .Status
 
@@ -54,10 +55,8 @@ However, JSON's simple grammar can support virtually any data model - additional
 context is required for machine clients and servers to interpret data and
 metadata in important ways.
 
-Ion exists to codify specific name/value pairs within a JSON object to better
-facilitate JSON-based data and metadata exchange between machine clients and
-servers while still being easy to read and understand by humans. As such, Ion
-does not define a new data grammar - it is a Media Subtype of `application/json`.
+Ion codifies specific name/value pairs within JSON objects to better
+facilitate JSON-based data and metadata exchange between machines.  And while machine interchange is the primary goal, Ion's second most important design goal is to enable intuitive and context-relevant structure so Ion content is very easy to understand for humans, even if they do not know what Ion is.  As such, Ion does not define a new data grammar - it is a Media Subtype of `application/json`.
 
 === Terminology
 
@@ -118,16 +117,13 @@ A JSON object without metadata is treated like any standard JSON object:
 }
 ----
 
-An Ion _Resource_ is a JSON object with a `meta` object field in addition to one or more other member name/value
-pairs:
+An Ion _Resource_ is a JSON object with a Metadata member named `meta` in addition to one or more other members (name/value pairs):
 
 .Example Ion Resource
 [source,json]
 ----
 {
-  "meta": {
-    "href": "https://api.example.com/users/1"
-  },
+  "meta": { "href": "https://api.example.com/users/1" },
   "firstName": "Bob",
   "lastName": "Smith",
   "birthDate": "1980-01-23"
@@ -144,9 +140,7 @@ An example empty Ion Collection Resource:
 [source,json]
 ----
 {
-  "meta": {
-    "href": "https://api.example.com/users"
-  },
+  "meta": { "href": "https://api.example.com/users" },
   "items": []
 }
 ----
@@ -157,9 +151,7 @@ Ion Collection Resources also support pagination, for example:
 [source,javascript]
 ----
 {
-  "meta": {
-    "href": "https://api.example.com/users"
-  },
+  "meta": { "href": "https://api.example.com/users" },
   "offset": 0,
   "limit": 25,
   "size": 218,
@@ -195,19 +187,15 @@ represented as follows:
 .Ion Link from one resource to another:
 [source,javascript]
 ----
-"employer": {
-    "meta": { "href": "https://api.example.com/corporations/acme" } }
-}
+"employer": { "meta": { "href": "https://api.example.com/corporations/acme" } } }
 ----
 
 === Notational Conventions
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in Key
-words for use in RFCs to Indicate Requirement Levels {uri-rfc2119}[RFC2119].  If
-these words are used without being spelled in uppercase then they are
-to be interpreted with their normal natural language meanings.
+"OPTIONAL" in this document are to be interpreted as described {uri-rfc2119}[RFC2119] when they appear in UPPERCASE.  If these words are used without being spelled in uppercase then they are
+to be interpreted with their normal natural language meanings, without any normative meaning.
 
 
 [[content-structure]]
@@ -219,23 +207,27 @@ name/value pairs called 'members' and any level of nested JSON objects.
 [[metadata]]
 == Metadata
 
-An JSON object MAY contain a direct child _Meta Object_ member named `meta`. If present,
-the _Meta Object_ represents data about its immediate parent JSON object. The _Meta Object_ is OPTIONAL.
+An JSON object MAY contain a _Meta Object_ member named `meta`. If present, the _Meta Object_ represents data about its immediate parent JSON object. The _Meta Object_ is OPTIONAL.
 
-If a Meta Object member is present, the member name MUST equal the
-case-sensitive octet sequence `meta` and the field value MUST be a non-null, non-empty
-JSON object. A _Meta Object_ MUST contain one or more name/value
-pairs. Ion parsers MUST reject Ion resources where a direct child `meta` field
-exists and the field value is `null` or an empty JSON object.
+An Ion parser MUST identify a member as a _Meta Object_ if and only if:
 
-The field names within a _Meta Object_ MUST be unique; Ion parsers MUST either
-reject _Meta Object_ fields with duplicate field names or use a JSON
-parser that returns only the lexically last duplicate field, as specified
+1. The member name is equal to the case-sensitive octet sequence `meta` and
+2. The member value is a JSON Object that has one or more members.
+
+If a member name is equal to the case-sensitive octet sequence `meta` and the member value is NOT a JSON Object (i.e. it is an array, number, string or the octet sequence literals `null`, `false`, or `true` as defined by {uri-rfc-json-value}[RFC 7159, Section 3]), an Ion parser MUST NOT identify the member as a _Meta Object_.
+
+If a member name is equal to the case-sensitive octet sequence `meta` and the member value is an empty JSON Object with no members, an Ion parser MUST NOT identify the member as a _Meta Object_.
+
+If a member name is not equal to the case-sensitive octet sequence `meta`, an Ion parser MUST NOT identify a member as a _Meta Object_.
+
+The member names within an identified _Meta Object_ MUST be unique; Ion parsers MUST either
+reject _Meta Object_ members with duplicate member names or use a JSON
+parser that returns only the lexically last duplicate member, as specified
 in {uri-ecmaScript-5-1-15-12}[Section 15.12 (The JSON Object)] of {uri-ecmaScript-5-1}[ECMAScript 5.1].
 
-The set of fields that a _Meta Object_ must contain to be considered valid
+The set of members that a _Meta Object_ must contain to be considered valid
 is resource-dependent.  In the absense of any resource-specific requirements,
-any field not understood by implementations MUST be ignored.
+any member not understood by implementations MUST be ignored.
 
 [[links]]
 == Links
@@ -273,27 +265,21 @@ A non-normative example of a Root Object that is also an Ion Link:
 [source,javascript]
 ----
 {
-  "meta": {
-    "href": "https://api.example.com/users/1"
-  },
+  "meta": { "href": "https://api.example.com/users/1" },
   "name": "Joe"
 }
 ----
 
 ===== Named Link Implicit Link Relation Type
 
-If a JSON object member value is an Ion Link, the Ion Link is implicitly assigned a relation type that equals the member name.
+If a JSON Object member value is an Ion Link, the Ion Link is implicitly assigned a link relation type that equals the member name.
+
+A non-normative example:
 
 [source,javascript]
 ----
-A non-normative example:
-
 {
-  "employer": {
-    "meta": {
-      "href": "https://api.example.com/corporations/acme"
-    }
-  }
+  "employer": { "meta": { "href": "https://api.example.com/corporations/acme" } }
 }
 ----
 
@@ -301,23 +287,17 @@ The above example shows an Ion Link member named `employer`.  The octet sequence
 
 ===== Collection Item Implicit Link Relation Type
 
-Any Ion Link in a Collection Resource's `items` array is always implicitly assigned the {uri-linkRelType-item}[`item`] link relation type.
+Any Ion Link in a Collection Resource's `items` array is implicitly assigned the {uri-linkRelType-item}[`item`] link relation type.
+
+A non-normative example:
 
 [source,javascript]
 ----
-A non-normative example:
-
 {
-  "meta": {
-    "href": "https://api.example.com/users"
-  },
+  "meta": { "href": "https://api.example.com/users" },
   "items": [
-    {
-      "meta": { "href": "https://api.example.com/users/1" }
-    },
-    {
-      "meta": { "href": "https://api.example.com/users/2" }
-    }
+    { "meta": { "href": "https://api.example.com/users/1" } },
+    { "meta": { "href": "https://api.example.com/users/2" } }
   ]
 }
 ----
@@ -326,71 +306,64 @@ The above example has 2 Ion Links in its `items` array.  Each of these 2 links a
 
 ==== Explicit Link Relation Types
 
-An Ion link MAY have one or more explicitly defined link relation types declared as an array of strings assigned to the link meta object's `rel` field.
+An Ion link MAY have one or more explicitly defined link relation types declared as an array of strings assigned to the link Meta Object's `rel` member.
 
 A non-normative example of a link with an explicitly defined link relation type:
 
-.Example Ion link with explicit link relation type:
+.Example Ion Link with explicit link relation type:
 [source,javascript]
 ----
-"icon": {
-  "meta": { "href": "https://cdn.example.com/example.ico", "rel": ["icon"] } }
-}
+"favIcon": { "meta": { "href": "https://cdn.example.com/example.ico", "rel": ["icon"] } } }
 ----
 
-The above example has an explicit link relation type of `icon`.
+The above example has an explicit link relation type of http://www.w3.org/TR/html5/links.html#rel-icon[`icon`].
 
 More than one explicit link relation type MAY be defined in the `rel` array.
 
+Ion parsers MUST NOT recognize any non-string value in the `rel` array as a link relation type.
+
 Ion parsers MUST treat null or empty `rel` values as if the `rel` property was not defined at all.
 
-An implicit link relation type is the JSON field name assigned to the link object.
+== Registered Metadata Member Names
 
-== Registered Metadata Field Names
-
-The following field names are registered in the IANA Ion Metadata field registry
-defined in [TBD].  None of the fields defined below are intended to be mandatory
+The following member names are registered in the IANA Ion Metadata member registry
+defined in [TBD].  None of the members defined below are intended to be mandatory
 in all cases, but rather, provide an initial set likely to be useful for common
 use cases.
 
 ==== `href`
 
-A resource's {uri-IRIs}[IRI] (Internationalized Resource Identifier).
+The `href` (hypermedia reference) member identifies the target {uri-IRIs}[IRI] (Internationalized Resource Identifier) location of the resource. The `href` value is a case-sensitive {uri-IRIs}[IRI] value.
 
-A _Link_ MUST contain an `href` field.  A _Link_ `href` IRI is the location of
- the linked resource, called the "target IRI".
-
-A _Meta Object_ MAY contain an OPTIONAL `href` field.  If present, the
-_Meta Object_ `href` field IRI is the location of the parent resource, called
-the "context IRI". It is RECOMMENDED that a _Meta Object_ always contain an
-`href`.
+If an `href` member exists, Ion parsers MUST identify the Meta Object as an Ion Link in addition to any other Ion Object identified by the Meta Object.
 
 Note that in the common case, target IRIs and context IRIs will also be
 {uri-URIs}[URI]s (RFC 3986), because many protocols (such as HTTP) do not support
 dereferencing IRIs.  In serializations that do not support IRIs, IRIs will be
-converted to URIs according to {uri-IRIs-3-1}[RFC 3987, Section 3.1].
+converted to URIs according to {uri-IRIs-3-1}[RFC 3987 Section 3.1].
+
+Use of this member is OPTIONAL.
 
 ==== `mediaType`
 
-A resource's https://tools.ietf.org/html/rfc6838[Media Type].  Use of this
-Field is OPTIONAL.
+The `mediaType` member identifies the resource's https://tools.ietf.org/html/rfc6838[Media Type].  The `mediaType` value is a case-insensitive string as defined by {uri-mediaType-namingReqs}[RFC 6838 Section 4.2]. Use of this member is OPTIONAL.
 
 ==== `rel`
 
-An array of IANA http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1[Link Relation Type]s.
+The `rel` member identifies one or more explicit http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1[Link Relation Type]s assigned to an Ion Link.  The value is a JSON array of strings.  Each string MUST conform to the `relation-type` grammar definition in https://tools.ietf.org/html/rfc5988#section-5[RFC 5988 Section 5].
 
-A _Link_ MAY contain a `rel` field.
+Use of this member is OPTIONAL.
 
-A _Link_ to an Ion collection resource MUST contain a `rel` field that has at least the `collection` relation specified.
+A _Link_ to a _Collection Resource_ SHOULD contain a `rel` member that has at least the `collection` relation specified.
 
 == IANA Considerations
 
-=== Ion Metadata Field Registry
+=== Ion Metadata Member Registry
 
-This specification establishes the IANA Ion Metadata Field registry for Ion
-Metadata Field Names.  The registry records the Field Name and a reference to
-the specification that defines it.  This specification registers the Field Names
-defined in Section 2.1.
+This specification establishes the IANA Ion Metadata Member Registry for Ion
+Metadata Member Names.  The registry records the Member Name and a reference to
+the specification that defines it.  This specification registers the Member Names
+defined in Section 5.
 
 Values are registered on a
 {uri-IANA-consideration-guidelines}[specification required] (RFC 5226) basis
@@ -404,14 +377,14 @@ published.
 Registration requests must filed as an
 https://github.com/ionwg/ion-doc/issues[ion-doc GitHub issue] for review and
 comment, with an appropriate subject (e.g., "Request to register metadata
-field: example").
+member: example").
 
 Within the review period, the Designated Expert(s) will either approve or deny
 the registration request, communicating this decision by closing the issue.
 Denials should include an explanation and, if applicable, suggestions as to
 how to make the request successful.  Registration requests that are undetermined
 for a period longer than 21 days can be brought to the IWG's attention using
-@mentions in a new GitHub issue for resolution.
+@mentions in a new comment appended to the GitHub issue for resolution.
 
 Criteria that should be applied by the Designated Expert(s) includes determining
 whether the proposed registration duplicates existing functionality, determining
@@ -419,7 +392,7 @@ whether it is likely to be of general applicability or whether it is useful only
 for a single application, and whether the registration description is clear.
 
 IANA must only accept registry updates from the Designated Expert(s) and should
-direct all requests for registration to the GitHub issue tracker.
+direct all requests for registration to the https://github.com/ionwg/ion-doc/issues[Ion issue tracker].
 
 It is suggested that multiple Designated Experts be appointed who are able to
 represent the perspectives of different applications using this specification,
@@ -433,18 +406,18 @@ Proposed registry description information:
 * Protocol Category: Ion
 * Registry Location: http://www.iana.org/assignments/ion
 * Webpage Title: Ion
-* Registry Name: Ion Metadata Fields
+* Registry Name: Ion Metadata Members
 
 ==== Registration Template
 
-.Field Name:
+.Member Name:
 The name requested (e.g., "href"). This name is case-sensitive.  Names may not
 match other registered names in a case-insensitive manner unless the
 Designated Expert(s) state that there is a compelling reason to allow an
 exception in this particular case.
 
-.Field Description
-Brief description of the Field (e.g., "Resource IRI location").
+.Member Description
+Brief description of the Member (e.g., "Resource target IRI location").
 
 .Change Controller:
 For Standards Track RFCs, state "IESG".  For others, give the name of the
@@ -455,3 +428,22 @@ page URI) may also be included.
 Reference to the document(s) that specify the parameter, preferably including
 URI(s) that can be used to retrieve copies of the document(s).  An indication
 of the relevant sections may also be included but is not required.
+
+[appendix]
+= Appendix
+
+Acknowledgements
+
+The authors acknowledge that the design of the Ion data format was initially influenced by design concepts in https://tools.ietf.org/html/rfc4287[RFC 4287, The Atom Syndication Format], specifically the parallels between Atom's \'Entry' and \'Container' and Ion's \'Resource' and \'Collection Resource' concepts, respectively.  The name 'Ion' is actually a playful nod to the Atom name, honoring this heritage.
+
+Ion's `meta` member concept was largely influenced by a lunch discussion on JSON linking between Tim Berners-Lee and Mark Nottingham as described in Mark Nottingham's https://www.mnot.net/blog/2011/11/25/linking_in_json[Linking In JSON blog post].  The Ion `meta` concept codifies this idea and defines a member registry for `meta` members useful for hypermedia interchange.
+
+.Authors' Addresses
+
+....
+Les Hazlewood
+Email: les@hazlewood.com
+URI: http://leshazlewood.com
+Company: Stormpath
+Company URI: https://stormpath.com
+....
