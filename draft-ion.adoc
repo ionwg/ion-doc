@@ -125,7 +125,7 @@ child `meta` name/value pair in addition to its other member name/value pairs:
 An Ion collection resource is an Ion resource with:
 
 1. a `collection` value in the `meta` object's `rel` (relation) array.
-1. An `items` array.
+2. An `items` array.
 
 An example Ion collection resource that does not currently reference other resources:
 
