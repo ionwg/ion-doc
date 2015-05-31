@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e # exit with nonzero exit code if anything fails
+set -x
 
 asciidoctor_installed=$(gem list -i asciidoctor)
 pygments_installed=$(gem list -i pygments)
@@ -14,5 +15,7 @@ if [ ! $pygments_installed ]; then
 fi
 
 asciidoctor --safe -D build draft-ion.adoc
+
+set +x
 
 #rake foo
