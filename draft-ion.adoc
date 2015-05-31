@@ -1,8 +1,9 @@
 = The Ion Data Interchange Format
 Les Hazlewood <les@hazlewood.com[@lhazlewood]>
 2014-12-27
-:revdate: 2014-12-27 14:07:33 -0800
-:toc:
+:revnumber: draft-ionwg-ion-01
+:source-highlighter: pygments
+:toc: right
 // URIs:
 :uri-json: http://tools.ietf.org/html/rfc7159
 :uri-rest: http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm
