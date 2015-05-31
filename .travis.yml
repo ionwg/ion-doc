@@ -23,7 +23,7 @@ script: ./deploy.sh
 #
 # 3. Change the 'secure' value below to be the output of the following command:
 #
-#     travis encrypt -r ionwg/ionwg.github.io 'GIT_EMAIL=YOUR_EMAIL GH_TOKEN=YOUR_GH_TOKEN'
+#     travis encrypt 'GIT_EMAIL=YOUR_EMAIL GH_TOKEN=YOUR_GH_TOKEN'
 #
 # where YOUR_EMAIL is your actual email address and YOUR_GH_TOKEN is your actual GitHub token value created in #2.
 env:
