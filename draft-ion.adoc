@@ -17,7 +17,7 @@ Les Hazlewood <les@hazlewood.com[@lhazlewood]>
 :uri-links: http://tools.ietf.org/html/rfc5988#section-3
 :uri-IANA-consideration-guidelines: https://tools.ietf.org/html/rfc5226
 
-draft-ionwg-ion-01
+A human-friendly JSON-based hypermedia type for machine data interchange.
 
 .Abstract
 
