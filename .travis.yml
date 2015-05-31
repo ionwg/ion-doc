@@ -29,4 +29,4 @@ script: ./deploy.sh
 env:
   global:
     - GITHUB_REPO='git@github.com:ionwg/ionwg.github.io.git'
-    - secure: "vkF8lKcLKVKTPuBjG+rq0rUUZEMowJlLVCTfz0o+uLlpP+iOqTa3r+2obaSnx/eMZDbgfy+X+yiAf+WhB7dG4NqduQuMBD1FumCRqZ3PTuB8LF3YU0KYtNc5/gvkJ1Zs/PU3tYKYCTXk0He1f/9M4mjaJM298vueCh+PmPMfw4k5/gkpfb+0myjUtYBTvCiwj/y8pgHS1rYP4dzkUxQcUAUSIE57SdZO/QNDuVgMgivGLYC78wF8sbjw/mZQWw3RaAF6orKN1PmwdDVcioo/hkPIiEM7cGUz5OpZTuklLE57aMReA+ogMS37IGwSNo0XNY2F0l6+bPTV7B5mP7so8hHKGvD1UDn4LMWcdO/B7B8689qG796B0m5b5uEb06inSfkBexCDkjEMNoBIxZPzWwBwAoGWq+d3Jt+NjbOdzT10UOsktTHg+/bpWI0jKW/NzuEx6/zGgDePSLbg6P6oIF8DZo4Gb0cTf/A2Qa83Ip/wo6mlgSAozMhlQXQAzlNq8agIFqW6w/xjYtDIXb/r1Ald/ZB0Fel6B2/4nM0aizcFpCn836Q89xcQ4hJj5+WDqf7L/S4VRnd5MLLWKJ1vGKLnoqTS/XcJLtGbB+DTznfd6mvIAxzc5XiNFV5ls+482prPLl8DUZVhif43Cuu7VZIfP5Xh0UnguUfrCaRqlto="
+    - secure: "eQTLtbtOXBkK58L5pFDuJMthghuMZ1i26wJ10wShZoXU+UjoDsa07K9bUbRSssxzGBx6+KcqVcb857immsm3/i3h97fKndIuRVW+6VX9lsWqZWaRI7kQMcQBQd9ymDkUsO4S/mwRROmtICf77gcuLiZlh1IA8ZixKc+fC3twhuQ="
