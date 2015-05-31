@@ -1,8 +1,8 @@
 = The Ion Data Interchange Format
-Les Hazlewood <les@hazlewood.com[@lhazlewood]>
-2014-12-27
-:revdate: 2014-12-27 14:07:33 -0800
-:toc:
+Les Hazlewood <les@hazlewood.com>
+:revnumber: draft-ionwg-ion-01
+:source-highlighter: pygments
+:toc: right
 // URIs:
 :uri-json: http://tools.ietf.org/html/rfc7159
 :uri-rest: http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm
@@ -22,11 +22,11 @@ Les Hazlewood <les@hazlewood.com[@lhazlewood]>
 :uri-IANA-consideration-guidelines: https://tools.ietf.org/html/rfc5226
 :uri-semver: http://semver.org
 
-draft-ionwg-ion-01
+A human-friendly JSON-based hypermedia type for machine data interchange.
 
 .Abstract
 
-This document specifies the Ion Data Interchange Format, a simple human-friendly
+This document specifies the Ion Data Interchange Format, a simple and human-friendly
 {uri-json}[JSON]-based hypermedia type for machine data interchange.
 
 .Status
@@ -45,6 +45,8 @@ This Internet-Draft will expire on 30 June 2015.
 
 Copyright (c) Les Hazlewood 2013-2015 and persons identified as document authors.
 All rights reserved.
+
+:sectnums:
 
 == Introduction
 
@@ -148,7 +150,7 @@ An example empty Ion Collection Resource:
 Ion Collection Resources also support pagination, for example:
 
 .Example Paginated Ion Collection Resource:
-[source,javascript]
+[source,json]
 ----
 {
   "meta": { "href": "https://api.example.com/users" },
@@ -185,9 +187,12 @@ corporation.  A link within the "Joe" resource to Joe's employer might be
 represented as follows:
 
 .Ion Link from one resource to another:
-[source,javascript]
+[source,json]
 ----
-"employer": { "meta": { "href": "https://api.example.com/corporations/acme" } } }
+{
+  "name": "Joe",
+  "employer": { "meta": { "href": "https://api.example.com/corporations/acme" } }
+}
 ----
 
 === Notational Conventions
@@ -239,9 +244,9 @@ Ion parsers MUST identify any JSON structure matching this definition as an Ion 
 A non-normative example of a minimal Ion link:
 
 .Example simplest Ion link:
-[source,javascript]
+[source,json]
 ----
-{ "meta": { "href": "https://api.example.com/corporations/acme" } } }
+{ "meta": { "href": "https://api.example.com/corporations/acme" } }
 ----
 
 === Link Relation Types
@@ -253,8 +258,8 @@ All Ion links have one or more <<links, link relation types>>.  A link's total s
 All Ion links have exactly one implicit link relation type.  The implicit link relation type can be one of three possible values depending on where the link is located in the Ion content:
 
 1. Root Object
-1. Named Link
-1. Collection Resource `items` array element
+2. Named Link
+3. Collection Resource `items` array element
 
 ===== Root Object Implicit Link Relation Type
 
@@ -262,7 +267,7 @@ If the Root Object is also found to be an Ion Link, it has an implicit link rela
 
 A non-normative example of a Root Object that is also an Ion Link:
 
-[source,javascript]
+[source,json]
 ----
 {
   "meta": { "href": "https://api.example.com/users/1" },
@@ -276,7 +281,7 @@ If a JSON Object member value is an Ion Link, the Ion Link is implicitly assigne
 
 A non-normative example:
 
-[source,javascript]
+[source,json]
 ----
 {
   "employer": { "meta": { "href": "https://api.example.com/corporations/acme" } }
@@ -291,7 +296,7 @@ Any Ion Link in a Collection Resource's `items` array is implicitly assigned the
 
 A non-normative example:
 
-[source,javascript]
+[source,json]
 ----
 {
   "meta": { "href": "https://api.example.com/users" },
@@ -311,9 +316,9 @@ An Ion link MAY have one or more explicitly defined link relation types declared
 A non-normative example of a link with an explicitly defined link relation type:
 
 .Example Ion Link with explicit link relation type:
-[source,javascript]
+[source,json]
 ----
-"favIcon": { "meta": { "href": "https://cdn.example.com/example.ico", "rel": ["icon"] } } }
+{ "meta": { "href": "https://cdn.example.com/example.ico", "rel": ["icon"] } }
 ----
 
 The above example has an explicit link relation type of http://www.w3.org/TR/html5/links.html#rel-icon[`icon`].
@@ -331,7 +336,7 @@ defined in [TBD].  None of the members defined below are intended to be mandator
 in all cases, but rather, provide an initial set likely to be useful for common
 use cases.
 
-==== `href`
+=== `href`
 
 The `href` (hypermedia reference) member identifies the target {uri-IRIs}[IRI] (Internationalized Resource Identifier) location of the resource. The `href` value is a case-sensitive {uri-IRIs}[IRI] value.
 
@@ -344,11 +349,11 @@ converted to URIs according to {uri-IRIs-3-1}[RFC 3987 Section 3.1].
 
 Use of this member is OPTIONAL.
 
-==== `mediaType`
+=== `mediaType`
 
 The `mediaType` member identifies the resource's https://tools.ietf.org/html/rfc6838[Media Type].  The `mediaType` value is a case-insensitive string as defined by {uri-mediaType-namingReqs}[RFC 6838 Section 4.2]. Use of this member is OPTIONAL.
 
-==== `rel`
+=== `rel`
 
 The `rel` member identifies one or more explicit http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1[Link Relation Type]s assigned to an Ion Link.  The value is a JSON array of strings.  Each string MUST conform to the `relation-type` grammar definition in https://tools.ietf.org/html/rfc5988#section-5[RFC 5988 Section 5].
 
@@ -430,13 +435,13 @@ URI(s) that can be used to retrieve copies of the document(s).  An indication
 of the relevant sections may also be included but is not required.
 
 [appendix]
-= Appendix
+== Appendix
 
 Acknowledgements
 
-The authors acknowledge that the design of the Ion data format was initially influenced by design concepts in https://tools.ietf.org/html/rfc4287[RFC 4287, The Atom Syndication Format], specifically the parallels between Atom's \'Entry' and \'Container' and Ion's \'Resource' and \'Collection Resource' concepts, respectively.  The name 'Ion' is actually a playful nod to the Atom name, honoring this heritage.
+The authors acknowledge that the design of the Ion data format was initially influenced by design concepts in https://tools.ietf.org/html/rfc4287[RFC 4287, The Atom Syndication Format], specifically the parallels between Atom's 'Entry' and 'Container' concepts and Ion's 'Resource' and 'Collection Resource' concepts, respectively.  The name 'Ion' is a playful nod to the Atom name, honoring this heritage.
 
-Ion's `meta` member concept was largely influenced by a lunch discussion on JSON linking between Tim Berners-Lee and Mark Nottingham as described in Mark Nottingham's https://www.mnot.net/blog/2011/11/25/linking_in_json[Linking In JSON blog post].  The Ion `meta` concept codifies this idea and defines a member registry for `meta` members useful for hypermedia interchange.
+Ion's `meta` member concept was largely influenced by a discussion on JSON linking between Tim Berners-Lee and Mark Nottingham as described in Mark Nottingham's https://www.mnot.net/blog/2011/11/25/linking_in_json[Linking In JSON blog post].  The Ion `meta` concept codifies this idea and defines a registry for `meta` members useful for hypermedia interchange.
 
 .Authors' Addresses
 
