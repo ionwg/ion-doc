@@ -8,20 +8,22 @@ mkdir build;
 
 repo="${GITHUB_REPO}"
 
-#printf '%s\n' "Github repo is $repo"
+printf '%s\n' "Github repo is $repo"
 
 # If GITHUB_REPO is an ssh URI, change it to the GitHub equivalent https URL:
 repo=$(echo "$repo" | sed 's/^git@github.com:/https:\/\/github.com\//')
-#printf '%s\n' "Converted repo is $repo"
+printf '%s\n' "Converted repo is $repo"
 # now ensure that the https:// scheme prefix is stripped so we can add in the token:
 repo=$(echo "$repo" | sed 's/^https:\/\///')
-#printf '%s\n' "Schemeless repo is $repo"
+printf '%s\n' "Schemeless repo is $repo"
 # now add in the scheme and token:
 repo="https://${GH_TOKEN}@$repo"
 #printf '%s\n' "Tokenized repo is $repo"
 
 # run our build script - this will create the rendered HTML that we'll push to the site
+printf '%s\n' "Before build.sh"
 ./build.sh
+printf '%s\n' "After build.sh"
 
 # if Travis is building a pull request to master, don't deploy - we only want to deploy
 # when data is actually merged to master:
