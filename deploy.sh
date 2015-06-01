@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e # exit with nonzero exit code if anything fails
-
 # clear and re-create the build directory
 rm -rf build || exit 0;
 mkdir build;
@@ -16,20 +14,16 @@ if [ -z "${REPO}" ]; then
 fi
 if [ -z "${EMAIL}" ]; then
     EMAIL=$(git config user.email)
-    if [ -z "${EMAIL}" ]; then
-        printf '%s\n' "Required GIT_EMAIL or 'git config user.email' value has not been set."
-        exit 1;
-    fi
+    [ -z "${EMAIL}" ] && echo "Required GIT_EMAIL or 'git config user.email' value has not been set." && exit 1
     printf '%s\n' "GIT_EMAIL value not set - defaulting to output of 'git config user.email': ${EMAIL}"
 fi
 if [ -z "${TOKEN}" ]; then
     TOKEN=$(git config --local github.token)
-    if [ -z "${TOKEN}" ]; then
-        printf '%s\n' "Required GIT_EMAIL or 'git config --local github.token' value has not been set."
-        exit 1;
-    fi
+    [ -z "${TOKEN}" ] && echo "Required GH_TOKEN or 'git config --local github.token' value has not been set." && exit 1
     printf '%s\n' "GH_TOKEN value not set - defaulting to output of 'git config --local github.token': <hidden>"
 fi
+
+set -e # exit with nonzero exit code if anything fails from here on
 
 # If GITHUB_REPO is an ssh URI, change it to the GitHub equivalent https URL:
 REPO=$(echo "${REPO}" | sed 's/^git@github.com:/https:\/\/github.com\//')
