@@ -2,6 +2,7 @@
 Les Hazlewood <les@hazlewood.com[@lhazlewood]>
 2014-12-27
 :revnumber: draft-ionwg-ion-01
+:revdate: {docdatetime}
 :source-highlighter: pygments
 :toc: right
 // URIs:
