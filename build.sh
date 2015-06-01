@@ -19,4 +19,7 @@ set -e # exit with nonzero exit code if anything fails
 #    printf '%s\n' "Installed pygments"
 #fi
 
-asciidoctor --safe -D build draft-ion.adoc
+# build time in UTC (ISO 8601 format):
+NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+asciidoctor --safe -a revdate="${NOW}" -D build draft-ion.adoc

@@ -1,6 +1,7 @@
 = The Ion Data Interchange Format
 Les Hazlewood <les@hazlewood.com>
 :revnumber: draft-ionwg-ion-01
+:revdate: {docdatetime}
 :source-highlighter: pygments
 :toc: right
 // URIs:
