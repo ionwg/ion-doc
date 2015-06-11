@@ -108,7 +108,7 @@ The following examples are non-normative.
 
 ==== Example Resources
 
-A JSON object without metadata is treated like any standard JSON object:
+A JSON object without metadata is treated like a standard JSON object:
 
 .Example JSON Object Without Metadata
 [source,json]
@@ -238,7 +238,7 @@ any member not understood by implementations MUST be ignored.
 [[links]]
 == Links
 
-An Ion Link is an Ion Object where its `meta` member contains an {uri-IRIs}[IRI] member named `href`. An Ion Link is therefore JSON serialization of a {uri-rfc5988}[web link] to another resource.
+An Ion Link is an Ion Object where its `meta` member contains an {uri-IRIs}[IRI] member named `href`. An Ion Link therefore is a JSON serialization of a {uri-rfc5988}[web link] to another resource.
 
 Ion parsers MUST identify any JSON structure matching this definition as an Ion Link.  Anything that does not match this defined structure MUST NOT be considered an Ion Link.
 
