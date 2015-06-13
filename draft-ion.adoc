@@ -75,7 +75,7 @@ A set of data that provides information about other data.
 A JSON object with one or more members that all represent Metadata.
 
 .Root Object
-The single JSON object at the root of an Ion content structure.  Ion content MUST begin with a JSON Object and not any other JSON value type.
+The single JSON object at the root of an Ion content structure.
 
 .Ion Object
 A JSON object with a Meta Object member named `meta`.
