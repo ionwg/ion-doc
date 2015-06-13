@@ -59,7 +59,7 @@ context is required for machine clients and servers to interpret data and
 metadata in important ways.
 
 Ion codifies specific name/value pairs within JSON objects to better
-facilitate JSON-based data and metadata exchange between machines.  And while machine interchange is the primary goal, Ion's second most important design goal is to enable intuitive and context-relevant structure so Ion content is very easy to understand for humans, even if they do not know what Ion is.  As such, Ion does not define a new data grammar - it is a Media Subtype of `application/json`.
+facilitate JSON-based data and metadata exchange between machines.  And while machine interchange is the primary goal, Ion's second most important design goal is to enable intuitive and context-relevant structure so Ion content is very easy to understand for humans, even if they do not know what Ion is.
 
 === Terminology
 
