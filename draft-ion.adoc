@@ -231,9 +231,7 @@ reject _Meta Object_ members with duplicate member names or use a JSON
 parser that returns only the lexically last duplicate member, as specified
 in {uri-ecmaScript-5-1-15-12}[Section 15.12 (The JSON Object)] of {uri-ecmaScript-5-1}[ECMAScript 5.1].
 
-The set of members that a _Meta Object_ must contain to be considered valid
-is resource-dependent.  In the absense of any resource-specific requirements,
-any member not understood by implementations MUST be ignored.
+A _Meta Object_ MAY contain members that are not defined in the Ion Metadata Member Registry.  Any member not understood by an Ion parser SHOULD be ignored.
 
 [[links]]
 == Links
