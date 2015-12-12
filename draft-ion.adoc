@@ -151,7 +151,7 @@ An example empty Ion Collection Resource:
 Ion Collection Resources can also support pagination, for example:
 
 .Example Paginated Ion Collection Resource:
-[source,json]
+[source,javascript]
 ----
 {
   "meta": { "href": "https://api.example.com/users" },
