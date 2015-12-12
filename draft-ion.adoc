@@ -148,7 +148,7 @@ An example empty Ion Collection Resource:
 }
 ----
 
-Ion Collection Resources also support pagination, for example:
+Ion Collection Resources can also support pagination, for example:
 
 .Example Paginated Ion Collection Resource:
 [source,json]
@@ -238,7 +238,14 @@ A _Meta Object_ MAY contain members that are not defined in the Ion Metadata Mem
 
 An Ion Link is an Ion Object where its `meta` member contains an {uri-IRIs}[IRI] member named `href`. An Ion Link therefore is a JSON serialization of a {uri-rfc5988}[web link] to another resource.
 
-Ion parsers MUST identify any JSON structure matching this definition as an Ion Link.  Anything that does not match this defined structure MUST NOT be considered an Ion Link.
+An Ion parser MUST identify a member as an _Ion Link_ if:
+
+1. The member is a Meta Object as defined in Section 3 and
+2. The Meta Object contains an {uri-IRIs}[IRI] member with a name equal to the case-sensitive octet sequence `href`.
+
+If the Meta Object `href` value is `null`, an empty string, or a whitespace-only (blank) string, an Ion parser MUST NOT identify the member as an _Ion Link_.
+
+It is possible for an Ion Object to be both an _Ion Resource_ and an _Ion Link_ if both respective parsing conditions are satisfied.
 
 A non-normative example of a minimal Ion link:
 
@@ -246,6 +253,17 @@ A non-normative example of a minimal Ion link:
 [source,json]
 ----
 { "meta": { "href": "https://api.example.com/corporations/acme" } }
+----
+
+A non-normative example of an Ion Object that is both an Ion Resource and an Ion Link:
+
+.Example Ion Object that is both an Ion Resource and an Ion Link:
+[source,json]
+----
+{
+  "meta": { "href": "https://api.example.com/corporations/acme" },
+  "name": "Acme, Inc."
+}
 ----
 
 === Link Relation Types
