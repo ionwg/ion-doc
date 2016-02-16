@@ -11,6 +11,7 @@ Les Hazlewood <les@hazlewood.com>
 :uri-rfc5988: http://tools.ietf.org/html/rfc5988
 :uri-rfc5988-links: https://tools.ietf.org/html/rfc5988#section-3
 :uri-rfc5988-linkRelType: https://tools.ietf.org/html/rfc5988#section-4
+:uri-rfc7231-methods: https://tools.ietf.org/html/rfc7231#section-4.1
 :uri-mediaType-namingReqs: https://tools.ietf.org/html/rfc6838#section-4.2
 :uri-rfc-json-value: https://tools.ietf.org/html/rfc7159#section-3
 :uri-linkRelType-item: http://tools.ietf.org/html/rfc6573#section-2.1
@@ -366,9 +367,29 @@ converted to URIs according to {uri-IRIs-3-1}[RFC 3987 Section 3.1].
 
 Use of this member is OPTIONAL.
 
-=== `mediaType`
+=== `method`
 
-The `mediaType` member identifies the resource's https://tools.ietf.org/html/rfc6838[Media Type].  The `mediaType` value is a case-insensitive string as defined by {uri-mediaType-namingReqs}[RFC 6838 Section 4.2]. Use of this member is OPTIONAL.
+The `method` member identifies the {uri-rfc7231-methods}[HTTP method] to be used when sending an HTTP request to the resource identified by the associated `href` member.  The `method` value is a case-sensitive string as defined by {uri-rfc7231-methods}[RFC 7231 Section 4.1] and safety and idempotent semantics are equivalent to those specified in RFC 7231.
+
+If an `href` member is defined and a peer `method` member is not defined, or the `method` member value is null or not recognized, HTTP `GET` MUST be used if an HTTP request is made to the linked resource.
+
+Use of this member is OPTIONAL.
+
+=== `accepts`
+
+The `accepts` member identifies one or more supported https://tools.ietf.org/html/rfc6838[Media Type]s of representations that may be submitted to the resource identified by the associated `href` member. The value is a JSON array of strings.  Each string in the array MUST be a case-insensitive string as defined by {uri-mediaType-namingReqs}[RFC 6838 Section 4.2].
+
+An HTTP user agent may submit an associated representation that conforms to any of these media types.  If submitting a representation, that representation's media type MUST be specified in the HTTP request https://tools.ietf.org/html/rfc7231#section-3.1.1.5[`Content-Type` header] value as defined by https://tools.ietf.org/html/rfc7231#section-3.4[RFC 7321 Section 3.4. Content Negotiation].
+
+Use of this member is OPTIONAL.
+
+=== `produces`
+
+The `produces` member identifies one or more HTTP response https://tools.ietf.org/html/rfc6838[Media Type]s for representations that may be returned from the resource identified by the associated `href` member.  The value is a JSON array of strings.  Each string in the array MUST be a case-insensitive string as defined by {uri-mediaType-namingReqs}[RFC 6838 Section 4.2].
+
+An HTTP server may return a response body that conforms to any of these media types; the exact media type will be specified in the HTTP response https://tools.ietf.org/html/rfc7231#section-3.1.1.5[`Content-Type` header] as defined by https://tools.ietf.org/html/rfc7231#section-3.4[RFC 7321 Section 3.4. Content Negotiation].
+
+Use of this member is OPTIONAL.
 
 === `rel`
 
