@@ -352,6 +352,63 @@ Ion parsers MUST NOT recognize any non-string value in the `rel` array as a link
 
 Ion parsers MUST treat null or empty `rel` values as if the `rel` property was not defined at all.
 
+== Forms
+
+=== Introduction to Forms
+
+If data can be submitted to a linked resource location, information about that data must be made available to a
+hypermedia client so it can properly collect and then submit the data.
+
+An Ion Form reflects name/value data pairs that may be submitted to a linked resource location. Each name/value pair,
+along with any additional information (such as constraints) for that pair, is collectively called a form _field_.  An
+Ion Form is then effectively a collection of _fields_ with additional metadata that controls how and where the form
+fields are to be submitted to a linked resource location.
+
+Because a form always reflects a linked resource location, every Ion Form can also be considered an Ion Link because
+it has a `meta` `href` member.
+
+Additionally, because every Ion Form has metadata and array of fields, every Ion Form is therefore also an
+Ion Collection (a collection of fields).
+
+=== Form Structure
+
+TBD.  Need to cover "type":"form" and "method" meta members.
+
+=== Form Field Members
+
+==== `type`
+
+===== `type` Values
+
+====== `text`
+
+====== `password
+
+====== `number`
+
+====== `email`
+
+====== `option`
+
+tBD
+
+==== `name`
+
+==== `value`
+
+==== `required`
+
+==== `enabled`
+
+==== `label`
+
+==== `placeholder`
+
+==== `pattern`
+
+==== `readOnly` (or `mutable` ?)
+
+
 == Registered Metadata Member Names
 
 The following member names are registered in the IANA Ion Metadata member registry
