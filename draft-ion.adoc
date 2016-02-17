@@ -382,7 +382,7 @@ TBD.  Need to cover "type":"form" and "method" meta members.
 
 ====== `text`
 
-====== `password
+====== `password`
 
 ====== `number`
 
