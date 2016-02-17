@@ -81,14 +81,17 @@ The single JSON object at the root of an Ion content structure.
 .Ion Object
 A JSON object with a Meta Object member named `meta`.
 
+.Ion Collection
+An Ion Object with an additional array member named `items`.
+
 .Resource
 An Ion Object that has one or more members in addition to its `meta` member.
 
 .Collection Resource
-A Resource that has an array member named `items` in addition to its `meta` member.
+An Ion Collection that has one or more members in addition to its `meta` and `items` members.
 
 .Link
-An Ion Object where its `meta` member contains an {uri-IRIs}[IRI] member named `href`.  This is the Ion representation of a {uri-links}[Web Link] that enables linking from one Resource to another.
+An Ion Object where its `meta` member contains an {uri-IRIs}[IRI] member named `href`.  This is the Ion representation of a {uri-links}[Web Link] that enables linking from one resource to another.
 
 === Media Type Name and Version
 
@@ -134,13 +137,15 @@ An Ion _Resource_ is a JSON object with a Metadata member named `meta` in additi
 }
 ----
 
-==== Example Collection Resources
+==== Example Collections
 
-An Ion Collection Resource is an Ion Resource that has an array member named `items`.
+An Ion Collection is an Ion Object that has an array member named `items` in addition to its `meta` member.  This `meta`
+member can reflect metadata about the items array or elements within the array, something the JSON grammar cannot do
+directly.
 
-An example empty Ion Collection Resource:
+An example empty Ion Collection:
 
-.Example Empty Ion Collection Resource:
+.Example Empty Ion Collection:
 [source,json]
 ----
 {
@@ -149,13 +154,13 @@ An example empty Ion Collection Resource:
 }
 ----
 
-Ion Collection Resources can also support pagination, for example:
+Ion Collections can also support pagination, for example:
 
-.Example Paginated Ion Collection Resource:
+.Example Paginated Ion Collection:
 [source,javascript]
 ----
 {
-  "meta": { "href": "https://api.example.com/users" },
+  "meta": { "href": "https://api.example.com/users", "rel": ["collection"] },
   "offset": 0,
   "limit": 25,
   "size": 218,
@@ -277,7 +282,7 @@ All Ion links have exactly one implicit link relation type.  The implicit link r
 
 1. Root Object
 2. Named Link
-3. Collection Resource `items` array element
+3. Ion Collection `items` array element
 
 ===== Root Object Implicit Link Relation Type
 
@@ -310,7 +315,7 @@ The above example shows an Ion Link member named `employer`.  The octet sequence
 
 ===== Collection Item Implicit Link Relation Type
 
-Any Ion Link in a Collection Resource's `items` array is implicitly assigned the {uri-linkRelType-item}[`item`] link relation type.
+Any Ion Link in an Ion Collection's `items` array is implicitly assigned the {uri-linkRelType-item}[`item`] link relation type.
 
 A non-normative example:
 
@@ -369,7 +374,7 @@ Use of this member is OPTIONAL.
 
 === `method`
 
-The `method` member identifies the {uri-rfc7231-methods}[HTTP method] to be used when sending an HTTP request to the resource identified by the associated `href` member.  The `method` value is a case-sensitive string as defined by {uri-rfc7231-methods}[RFC 7231 Section 4.1] and safety and idempotent semantics are equivalent to those specified in RFC 7231.
+The `method` member identifies the {uri-rfc7231-methods}[HTTP method] to be used when sending an HTTP request to the associated `href` resource location.  The `method` value is a case-sensitive string as defined by {uri-rfc7231-methods}[RFC 7231 Section 4.1] and safety and idempotent semantics are equivalent to those specified in RFC 7231.
 
 If an `href` member is defined and a peer `method` member is not defined, or the `method` member value is null or not recognized, HTTP `GET` MUST be used if an HTTP request is made to the linked resource.
 
@@ -377,7 +382,7 @@ Use of this member is OPTIONAL.
 
 === `accepts`
 
-The `accepts` member identifies one or more supported https://tools.ietf.org/html/rfc6838[Media Type]s of representations that may be submitted to the resource identified by the associated `href` member. The value is a JSON array of strings.  Each string in the array MUST be a case-insensitive string as defined by {uri-mediaType-namingReqs}[RFC 6838 Section 4.2].
+The `accepts` member identifies one or more supported representation https://tools.ietf.org/html/rfc6838[Media Type] that may be submitted to the associated `href` resource location. The value is a JSON array of strings.  Each string in the array MUST be a case-insensitive string as defined by {uri-mediaType-namingReqs}[RFC 6838 Section 4.2].
 
 An HTTP user agent may submit an associated representation that conforms to any of these media types.  If submitting a representation, that representation's media type MUST be specified in the HTTP request https://tools.ietf.org/html/rfc7231#section-3.1.1.5[`Content-Type` header] value as defined by https://tools.ietf.org/html/rfc7231#section-3.4[RFC 7321 Section 3.4. Content Negotiation].
 
@@ -385,7 +390,7 @@ Use of this member is OPTIONAL.
 
 === `produces`
 
-The `produces` member identifies one or more HTTP response https://tools.ietf.org/html/rfc6838[Media Type]s for representations that may be returned from the resource identified by the associated `href` member.  The value is a JSON array of strings.  Each string in the array MUST be a case-insensitive string as defined by {uri-mediaType-namingReqs}[RFC 6838 Section 4.2].
+The `produces` member identifies one or more HTTP response representation https://tools.ietf.org/html/rfc6838[Media Type]s that may be returned from the associated `href` resource location.  The value is a JSON array of strings.  Each string in the array MUST be a case-insensitive string as defined by {uri-mediaType-namingReqs}[RFC 6838 Section 4.2].
 
 An HTTP server may return a response body that conforms to any of these media types; the exact media type will be specified in the HTTP response https://tools.ietf.org/html/rfc7231#section-3.1.1.5[`Content-Type` header] as defined by https://tools.ietf.org/html/rfc7231#section-3.4[RFC 7321 Section 3.4. Content Negotiation].
 
@@ -397,7 +402,7 @@ The `rel` member identifies one or more explicit http://www.iana.org/assignments
 
 Use of this member is OPTIONAL.
 
-A _Link_ to a _Collection Resource_ SHOULD contain a `rel` member that has at least the `collection` relation specified.
+A _Link_ to a _Ion Collection_ SHOULD contain a `rel` member that has at least the `collection` relation specified.
 
 == IANA Considerations
 
