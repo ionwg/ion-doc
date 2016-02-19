@@ -92,6 +92,9 @@ An Ion Collection that has one or more members in addition to its `meta` and `it
 .Link
 An Ion Object where its `meta` member contains an {uri-IRIs}[IRI] member named `href`.  This is the Ion representation of a {uri-links}[Web Link] that enables linking from one resource to another.
 
+.Form
+An Ion Collection of form fields that represent data that may be submitted to a linked resource location.
+
 === Media Type Name and Version
 
 The Media Type name assigned for Ion content is:
