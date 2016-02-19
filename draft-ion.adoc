@@ -132,7 +132,7 @@ An Ion _Resource_ is a JSON object with a Metadata member named `meta` in additi
 [source,json]
 ----
 {
-  "meta": { "href": "https://api.example.com/users/1" },
+  "meta": { "href": "https://example.io/users/1" },
   "firstName": "Bob",
   "lastName": "Smith",
   "birthDate": "1980-01-23"
@@ -151,7 +151,7 @@ An example empty Ion Collection:
 [source,json]
 ----
 {
-  "meta": { "href": "https://api.example.com/users" },
+  "meta": { "href": "https://example.io/users" },
   "items": []
 }
 ----
@@ -162,24 +162,24 @@ Ion Collections can also support pagination, for example:
 [source,javascript]
 ----
 {
-  "meta": { "href": "https://api.example.com/users", "rel": ["collection"] },
+  "meta": { "href": "https://example.io/users", "rel": ["collection"] },
   "offset": 0,
   "limit": 25,
   "size": 218,
-  "first": { "meta": { "href": "https://api.example.com/users", "rel": ["collection"] } },
+  "first": { "meta": { "href": "https://example.io/users", "rel": ["collection"] } },
   "previous": null,
-  "next": { "meta": { "href": "https://api.example.com/users?offset=25", "rel": ["collection"] } },
-  "last": { "meta": { "href": "https://api.example.com/users?offset=200", "rel": ["collection"] } },
+  "next": { "meta": { "href": "https://example.io/users?offset=25", "rel": ["collection"] } },
+  "last": { "meta": { "href": "https://example.io/users?offset=200", "rel": ["collection"] } },
   "items": [
     {
-      "meta": { "href": "https://api.example.com/users/1" },
+      "meta": { "href": "https://example.io/users/1" },
       "firstName": "Bob",
       "lastName": "Smith",
       "birthDate": "1977-04-18"
     },
     //... items 2-24 omitted for brevity
     {
-      "meta": { "href": "https://api.example.com/users/25" },
+      "meta": { "href": "https://example.io/users/25" },
       "firstName": "Jane",
       "lastName": "Doe",
       "birthDate": "1980-01-23"
@@ -200,7 +200,7 @@ represented as follows:
 ----
 {
   "name": "Joe",
-  "employer": { "meta": { "href": "https://api.example.com/corporations/acme" } }
+  "employer": { "meta": { "href": "https://example.io/corporations/acme" } }
 }
 ----
 
@@ -213,7 +213,7 @@ An Ion Form ensures that resource transitions that require data submissions can 
 [source,json]
 ----
 {
-  "meta": { "href": "https://api.example.com/loginAttempts", "rel":["form"], "method": "POST"},
+  "meta": { "href": "https://example.io/loginAttempts", "rel":["form"], "method": "POST"},
   "items": [
     { "name": "username" },
     { "name": "password", "type": "password" }
@@ -279,7 +279,7 @@ A non-normative example of a minimal Ion link:
 .Example simplest Ion link:
 [source,json]
 ----
-{ "meta": { "href": "https://api.example.com/corporations/acme" } }
+{ "meta": { "href": "https://example.io/corporations/acme" } }
 ----
 
 A non-normative example of an Ion Object that is both an Ion Resource and an Ion Link:
@@ -288,7 +288,7 @@ A non-normative example of an Ion Object that is both an Ion Resource and an Ion
 [source,json]
 ----
 {
-  "meta": { "href": "https://api.example.com/corporations/acme" },
+  "meta": { "href": "https://example.io/corporations/acme" },
   "name": "Acme, Inc."
 }
 ----
@@ -314,7 +314,7 @@ A non-normative example of a Root Object that is also an Ion Link:
 [source,json]
 ----
 {
-  "meta": { "href": "https://api.example.com/users/1" },
+  "meta": { "href": "https://example.io/users/1" },
   "name": "Joe"
 }
 ----
@@ -328,7 +328,7 @@ A non-normative example:
 [source,json]
 ----
 {
-  "employer": { "meta": { "href": "https://api.example.com/corporations/acme" } }
+  "employer": { "meta": { "href": "https://example.io/corporations/acme" } }
 }
 ----
 
@@ -343,10 +343,10 @@ A non-normative example:
 [source,json]
 ----
 {
-  "meta": { "href": "https://api.example.com/users" },
+  "meta": { "href": "https://example.io/users" },
   "items": [
-    { "meta": { "href": "https://api.example.com/users/1" } },
-    { "meta": { "href": "https://api.example.com/users/2" } }
+    { "meta": { "href": "https://example.io/users/1" } },
+    { "meta": { "href": "https://example.io/users/2" } }
   ]
 }
 ----
@@ -406,7 +406,7 @@ A non-normative example:
 [source,json]
 ----
 {
-  "meta": { "href": "https://api.example.com/loginAttempts", "rel":["form"], "method": "POST"},
+  "meta": { "href": "https://example.io/loginAttempts", "rel":["form"], "method": "POST"},
   "items": [
     { "name": "username" },
     { "name": "password", "type": "password" }
