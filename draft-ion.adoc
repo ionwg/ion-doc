@@ -41,12 +41,11 @@ and may be updated, replaced, or obsoleted by other documents at any
 time.  It is inappropriate to use Internet-Drafts as reference
 material or to cite them other than as "work in progress."
 
-This Internet-Draft will expire on 31 July 2016.
+This Internet-Draft will expire on 30 June 2016.
 
 .Copyright Notice
 
-Copyright (c) Les Hazlewood 2013-2015 and persons identified as document authors.
-All rights reserved.
+Copyright (c) Les Hazlewood 2013-2016 and persons identified as document authors.  All rights reserved.
 
 :sectnums:
 
