@@ -201,6 +201,23 @@ represented as follows:
 }
 ----
 
+==== Example Form
+
+An Ion Form ensures that resource transitions that require data submissions can be discovered automatically
+(colloquially referred to as https://en.wikipedia.org/wiki/HATEOAS[HATEOS]).
+
+.Example Ion Form
+[source,json]
+----
+{
+  "meta": { "href": "https://api.example.com/loginAttempts", "rel":["form"], "method": "POST"},
+  "items": [
+    { "name": "username" },
+    { "name": "password", "type": "password" }
+  ]
+}
+----
+
 === Notational Conventions
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
@@ -386,7 +403,7 @@ A non-normative example:
 [source,json]
 ----
 {
-  "meta": { "href": "https://api.example.com/users", "rel":["form"], "method": "POST"},
+  "meta": { "href": "https://api.example.com/loginAttempts", "rel":["form"], "method": "POST"},
   "items": [
     { "name": "username" },
     { "name": "password", "type": "password" }
