@@ -213,6 +213,8 @@ to be interpreted with their normal natural language meanings, without any norma
 [[content-structure]]
 == Content Structure
 
+Ion content MUST use UTF-8 encoding.  Other encodings MUST NOT be used.
+
 Ion content MUST have exactly one root JSON object, called the _Root Object_.  The Root Object MAY contain
 name/value pairs called 'members' and any level of nested JSON objects.
 
@@ -352,15 +354,14 @@ Ion parsers MUST NOT recognize any non-string value in the `rel` array as a link
 
 Ion parsers MUST treat null or empty `rel` values as if the `rel` property was not defined at all.
 
+[[forms]]
 == Forms
 
-=== Introduction to Forms
-
 If data can be submitted to a linked resource location, information about that data must be made available to a
-hypermedia client so it can properly collect and then submit the data.
+hypermedia client so it can collect and then submit the data.
 
-An Ion Form reflects name/value data pairs that may be submitted to a linked resource location. Each name/value pair,
-along with any additional information (such as constraints) for that pair, is collectively called a form _field_.  An
+An Ion Form represents named data values that may be submitted to a linked resource location. Each named data value,
+along with any additional information (such as constraints) for that data, is collectively called a form _field_.  An
 Ion Form is then effectively a collection of _fields_ with additional metadata that controls how and where the form
 fields are to be submitted to a linked resource location.
 
@@ -370,44 +371,223 @@ it has a `meta` `href` member.
 Additionally, because every Ion Form has metadata and array of fields, every Ion Form is therefore also an
 Ion Collection (a collection of fields).
 
+[[form-structure]]
 === Form Structure
 
-TBD.  Need to cover "type":"form" and "method" meta members.
+An Ion Form is an Ion Collection with the following additional requirements:
 
+1. An Ion Form's `meta` object MUST have a valid `href` member.
+2. An Ion Form's `meta` object MUST have a `rel` member that contains the octet sequence `form`.
+3. An Ion Form's `items` array MUST contain one or more Ion Form Fields.
+4. An Ion Form's `items` array MUST NOT contain elements that are not Ion Form Fields.
+5. An Ion Form's `items` array MUST NOT be `null` or empty.
+
+A non-normative example:
+
+[source,json]
+----
+{
+  "meta": { "href": "https://api.example.com/users", "rel":["form"], "method": "POST"},
+  "items": [
+    { "name": "username" },
+    { "name": "password", "type": "password" }
+  ]
+}
+----
+
+[[form-fields]]
+=== Form Fields
+
+An Ion Form Field is a JSON object in an Ion Form's `items` array.
+
+An Ion Form Field MUST have a string member named `name`.
+
+Each Ion Form Field within an Ion Form's `items` array MUST have a unique `name` value compared to any other Form Field
+within the same array.
+
+[[form-field-members]]
 === Form Field Members
 
-==== `type`
-
-===== `type` Values
-
-====== `text`
-
-====== `password`
-
-====== `number`
-
-====== `email`
-
-====== `option`
-
-TBD
-
-==== `name`
-
-==== `value`
-
-==== `required`
+An Ion Form Field has one or more of the following members.
 
 ==== `enabled`
 
+The `enabled` member is a boolean.
+
+If present, a `false` value indicates that the field MUST NOT be used, modified or submitted to the linked resource location.
+
+If not present, or if equal to `true`, the field may be submitted to the linked resource location.
+
+Use of this member is OPTIONAL.
+
+==== `gt`
+
+The `gt` member is a date or a number.
+
+If present, the field value must be greater than the `gt` value.
+
+The `gt` value MUST be the same data type as the field `type`.
+
+This member MUST NOT be used with non-date or non-number field `type`s.
+
+Use of this member is OPTIONAL.
+
+==== `gte`
+
+The `gte` member is a date or a number.
+
+If present, the field value must be greater than or equal to the `gte` value.
+
+The `gte` value MUST be the same data type as the field `type`.
+
+This member MUST NOT be used with non-date or non-number field `type`s.
+
+Use of this member is OPTIONAL.
+
 ==== `label`
 
-==== `placeholder`
+The `label` member is a string.  A `label` is a description of the field that may be used to enhance usability.
+
+Use of this member is OPTIONAL.
+
+==== `lt`
+
+The `lt` member is a date or a number.
+
+If present, the field value must be less than the `lt` value.
+
+The `lt` value MUST be the same data type as the field `type`.
+
+This member MUST NOT be used with non-date or non-number field `type`s.
+
+Use of this member is OPTIONAL.
+
+==== `lte`
+
+The `lte` member is a date or a number.
+
+If present, the field value must be less than or equal to the `lte` value.
+
+The `lte` value MUST be the same data type as the field `type`.
+
+This member MUST NOT be used with non-date or non-number field `type`s.
+
+Use of this member is OPTIONAL.
+
+==== `name`
+
+The `name` member is a string.  The `name` value is the name assigned to the field.
+
+The `name` value MUST NOT be `null`.
+
+The `name` value MUST NOT contain only whitespace.
+
+The `name` value MUST be unique compared to any other Form Field `name` value in the containing Form's `items` array.
+
+Use of this member is REQUIRED.
+
+==== `value`
+
+The `value` is the default value for the field.
+
+The `value` value MUST be the same data type as the field `type`.
+
+Use of this member is OPTIONAL.
 
 ==== `pattern`
 
-==== `readOnly` (or `mutable` ?)
+The `pattern` member is a string that defines a regular expression that the field value must be validated against.
 
+The `pattern` member MUST NOT be specified on fields with non-string or non-date value types.
+
+Use of this member is OPTIONAL.
+
+==== `placeholder`
+
+The `placeholder` member is a string.  It defines a short hint that describes the expected field value.
+
+Use of this member is OPTIONAL.
+
+==== `mutable`
+
+The `mutable` member is a boolean.  If present, the value MUST equal `false`.
+
+A `false` value indicates that the field MUST NOT be used or modified before it is submitted to the linked resource location.
+
+Use of this member is OPTIONAL.
+
+==== `required`
+
+The `required` member is a boolean.
+
+If present, a `true` value indicates that the field value MUST be populated with a non-`null` value before the form may be submitted to the linked resource location.
+
+A form with unpopulated non-`null` required fields MUST NOT be submitted to the form's linked resource location.
+
+If not present, or if equal to `false`, the field is optional and does not need to be populated with a value before form submission.
+
+Use of this member is OPTIONAL.
+
+==== `visible`
+
+The `visible` member is a boolean.
+
+If present, a `false` value indicates that the field MUST NOT be visible to Ion client users.
+
+If not present, or if equal to `true`, the field must be visible to Ion client users.
+
+If a field is not visible, it is usually used to retain a default value that must be supplied to the linked resource location when the form is submitted.
+
+Use of this member is OPTIONAL.
+
+==== `type`
+
+The `type` member is a string equal to one of the octet sequences defined in Form Field type Values[form-field-type-values].
+
+The `type` member indicates the mandatory data type that the `value` member must adhere to.
+
+If a field does not specify a `type` member, an Ion parser MUST use the default `type` of `string` for the field.
+
+Use of this member is OPTIONAL.
+
+[[form-field-type-values]]
+=== Form Field `type` Values
+
+==== `boolean`
+
+The `value` must be a JSON boolean.
+
+==== `date`
+
+The `value` must be a JSON string that conforms to the ISO 8601 profile defined in https://www.ietf.org/rfc/rfc3339.txt[RFC 3339].
+
+==== `decimal`
+
+The `value` must be a JSON number that contains a decimal point.
+
+==== `email`
+
+The `value` must be a JSON string that is also a valid email address.
+
+==== `integer`
+
+The `value` must be a JSON number that does not contain a decimal point.
+
+==== `number`
+
+The `value` must be a JSON number.
+
+==== `password`
+
+The `value` must be a JSON string and user agents should mask the characters so they are not directly visible to a user.
+
+==== `select`
+
+TBD: select, radio, checkbox
+
+==== `string`
+
+The `value` must be a JSON string.
 
 == Registered Metadata Member Names
 
