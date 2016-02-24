@@ -113,11 +113,11 @@ value.  For example (non-normative):
 
 === Examples
 
-The following examples are non-normative.
+All following examples are non-normative.
 
-==== Example Resources
+==== Example Objects
 
-A JSON object without metadata is treated like a standard JSON object:
+A JSON object without metadata is treated as a standard JSON object:
 
 .Example JSON Object Without Metadata
 [source,json]
@@ -194,7 +194,7 @@ Ion Collections can also support pagination, for example:
 ==== Example Links
 
 An Ion Link is an Ion Object representation of a {uri-rfc5988}[web link] to another
-resource. For example, assume that a user "Joe" is an employee of "Acme"
+resource. For example, assume that someone named "Joe" is an employee of "Acme"
 corporation.  A link within the "Joe" resource to Joe's employer might be
 represented as follows:
 
