@@ -1,4 +1,4 @@
-= The Ion Data Interchange Format
+= The Ion Hypermedia Type
 Les Hazlewood <les@hazlewood.com>
 :revnumber: draft-ionwg-ion-01
 :revdate: {docdatetime}
@@ -28,7 +28,7 @@ A human-friendly JSON-based hypermedia type for machine data interchange.
 
 .Abstract
 
-This document specifies the Ion Data Interchange Format, a simple and human-friendly
+This document specifies the Ion Hypermedia Type, a simple and human-friendly
 {uri-json}[JSON]-based hypermedia type for machine data interchange.
 
 .Status
@@ -58,8 +58,10 @@ However, JSON's simple grammar can support virtually any data model - additional
 context is required for machine clients and servers to interpret data and
 metadata in important ways.
 
-Ion codifies specific name/value pairs within JSON objects to better
-facilitate JSON-based data and metadata exchange between machines.  And while machine interchange is the primary goal, Ion's second most important design goal is to enable intuitive and context-relevant structure so Ion content is very easy to understand for humans, even if they do not know what Ion is.
+Ion codifies specific name/value pairs within JSON objects to better facilitate JSON-based data and metadata exchange
+between machines.  And while machine interchange is the primary goal, Ion's second most important design goal is to
+enable intuitive and context-relevant structure so Ion content is very easy to understand for humans, even if they do
+not know what Ion is.
 
 === Terminology
 
@@ -431,71 +433,87 @@ An Ion Form Field has one or more of the following members.
 
 ==== `enabled`
 
-The `enabled` member is a boolean.
+The `enabled` member indicates whether or not the field `value` may be modified or submitted to the form's linked resource location.
 
-If present, a `false` value indicates that the field MUST NOT be used, modified or submitted to the linked resource location.
+The `enabled` member is a boolean; it must equal either `true` or `false`. `null` or any other JSON value MUST NOT be specified.
 
-If not present, or if equal to `true`, the field may be submitted to the linked resource location.
+A `false` value indicates that the field value MUST NOT be modified or submitted to the form's linked resource location.
+
+If the `enabled` member is not present, or if it present and equal to `true`, the field may be modified or submitted to the form's linked resource location.
+
+If a field should be considered enabled, it is RECOMMENDED to omit the `enabled` member entirely to reduce verbosity.
 
 Use of this member is OPTIONAL.
 
 ==== `gt`
 
-The `gt` member is a date or a number.
+The `gt` member indicates that the field `value` must be greater than the specified `gt` member value.
 
-If present, the field value must be greater than the `gt` value.
+The `gt` member is a date or a number. The `gt` value MUST conform to the data type specified by the field `type`.
+This member MUST NOT be used with a non-date or non-number field `type`.
 
-The `gt` value MUST be the same data type as the field `type`.
+If the `gt` member is present, the field `value` must be greater than the `gt` value.
 
-This member MUST NOT be used with non-date or non-number field `type`s.
+If the `gt` member is not present, there is no 'greater than' restriction on the field `value`.
+
+The `gt` and `gte` members are mutually exclusive - if one is declared, the other MUST NOT be declared.
 
 Use of this member is OPTIONAL.
 
 ==== `gte`
 
-The `gte` member is a date or a number.
+The `gte` member indicates that the field `value` must be greater than or equal to the specified `gte` member value.
 
-If present, the field value must be greater than or equal to the `gte` value.
+The `gte` member is a date or a number. The `gte` value MUST conform to the data type specified by the field `type`.
+This member MUST NOT be used with a non-date or non-number field `type`.
 
-The `gte` value MUST be the same data type as the field `type`.
+If the `gte` member is present, the field `value` must be greater than or equal to the `gte` value.
 
-This member MUST NOT be used with non-date or non-number field `type`s.
+If the `gte` member is not present, there is no 'greater than or equal to' restriction on the field `value`.
+
+The `gt` and `gte` members are mutually exclusive - if one is declared, the other MUST NOT be declared.
 
 Use of this member is OPTIONAL.
 
 ==== `label`
 
-The `label` member is a string.  A `label` is a description of the field that may be used to enhance usability.
+The `label` member is a string description of the field that may be used to enhance usability.
 
 Use of this member is OPTIONAL.
 
 ==== `lt`
 
-The `lt` member is a date or a number.
+The `lt` member indicates that the field `value` must be less than the specified `lt` member value.
 
-If present, the field value must be less than the `lt` value.
+The `lt` member is a date or a number. The `lt` value MUST conform to the data type specified by the field `type`.
+This member MUST NOT be used with a non-date or non-number field `type`.
 
-The `lt` value MUST be the same data type as the field `type`.
+If the `lt` member is present, the field `value` must be less than the `lt` value.
 
-This member MUST NOT be used with non-date or non-number field `type`s.
+If the `lt` member is not present, there is no 'less than' restriction on the field `value`.
+
+The `lt` and `lte` members are mutually exclusive - if one is declared, the other MUST NOT be declared.
 
 Use of this member is OPTIONAL.
 
 ==== `lte`
 
-The `lte` member is a date or a number.
+The `lte` member indicates that the field `value` must be less than or equal to the specified `lte` member value.
 
-If present, the field value must be less than or equal to the `lte` value.
+The `lte` member is a date or a number. The `lte` value MUST conform to the data type specified by the field `type`.
+This member MUST NOT be used with a non-date or non-number field `type`.
 
-The `lte` value MUST be the same data type as the field `type`.
+If the `lte` member is present, the field `value` must be less than or equal to the `lte` value.
 
-This member MUST NOT be used with non-date or non-number field `type`s.
+If the `lte` member is not present, there is no 'less than or equal to' restriction on the field `value`.
+
+The `lt` and `lte` members are mutually exclusive - if one is declared, the other MUST NOT be declared.
 
 Use of this member is OPTIONAL.
 
 ==== `name`
 
-The `name` member is a string.  The `name` value is the name assigned to the field.
+The `name` member is a string name assigned to the field.
 
 The `name` value MUST NOT be `null`.
 
@@ -507,15 +525,15 @@ Use of this member is REQUIRED.
 
 ==== `value`
 
-The `value` is the default value for the field.
+The `value` member reflects the value assigned to the field.
 
-The `value` value MUST be the same data type as the field `type`.
+The `value` value MUST conform to the data type specified by the field `type`
 
 Use of this member is OPTIONAL.
 
 ==== `pattern`
 
-The `pattern` member is a string that defines a regular expression that the field value must be validated against.
+The `pattern` member is a string that defines a regular expression that the field `value` must be validated against.
 
 The `pattern` member MUST NOT be specified on fields with non-string or non-date value types.
 
@@ -523,49 +541,59 @@ Use of this member is OPTIONAL.
 
 ==== `placeholder`
 
-The `placeholder` member is a string.  It defines a short hint that describes the expected field value.
+The `placeholder` member is a short hint string that describes the expected field `value`.
 
 Use of this member is OPTIONAL.
 
 ==== `mutable`
 
-The `mutable` member is a boolean.  If present, the value MUST equal `false`.
+The `mutable` member indicates whether or not the field value may be modified before it is submitted to the form's linked resource location.
 
-A `false` value indicates that the field MUST NOT be used or modified before it is submitted to the linked resource location.
+The `mutable` member is a boolean; it must equal either `true` or `false`. `null` or any other JSON value MUST NOT be specified.
+
+A `false` value indicates that the field value MUST NOT be modified before it is submitted to the form's linked resource location.
+
+If the `mutable` member is not present, or if it present and equal to `true`, the field value may be modified before it is submitted to the form's linked resource location.
+
+If a field should be considered mutable, it is RECOMMENDED to omit the `mutable` member entirely to reduce verbosity.
 
 Use of this member is OPTIONAL.
 
 ==== `required`
 
-The `required` member is a boolean.
+The `required` member indicates whether or not the field value may equal `null` before is submitted to the form's linked resource location.
 
-If present, a `true` value indicates that the field value MUST be populated with a non-`null` value before the form may be submitted to the linked resource location.
+The `required` member is a boolean; it must equal either `true` or `false`. `null` or any other JSON value MUST NOT be specified.
 
-A form with unpopulated non-`null` required fields MUST NOT be submitted to the form's linked resource location.
+A `true` value indicates that the field value MUST NOT equal `null` before it is submitted to the form's linked resource location.
 
-If not present, or if equal to `false`, the field is optional and does not need to be populated with a value before form submission.
+If the `required` member is not present, or if it present and equal to `false`, the field value MAY equal `null` before it is submitted to the form's linked resource location.
+
+If a field should not be considered required (i.e. optional), it is RECOMMENDED to omit the `required` member entirely to reduce verbosity.
 
 Use of this member is OPTIONAL.
 
 ==== `visible`
 
-The `visible` member is a boolean.
+The `visible` member indicates whether or not the field should be made visible by a user agent.  Fields that are not visible are usually used to retain a default value that must be submitted to the form's linked resource location.
 
-If present, a `false` value indicates that the field MUST NOT be visible to Ion client users.
+The `visible` member is a boolean; it must equal either `true` or `false`. `null` or any other JSON value MUST NOT be specified.
 
-If not present, or if equal to `true`, the field must be visible to Ion client users.
+A `false` value indicates that the field MUST NOT be made visible by a user agent.
 
-If a field is not visible, it is usually used to retain a default value that must be supplied to the linked resource location when the form is submitted.
+If the `visible` member is not present, or if it present and equal to `true`, the field MUST be made visible by a user agent.
+
+If a field should be considered visible, it is RECOMMENDED to omit the `visible` member entirely to reduce verbosity.
 
 Use of this member is OPTIONAL.
 
 ==== `type`
 
-The `type` member is a string equal to one of the octet sequences defined in Form Field type Values[form-field-type-values].
+The `type` member specifies the mandatory data type that the `value` member must adhere to.
 
-The `type` member indicates the mandatory data type that the `value` member must adhere to.
+The `type` member value is a string equal to one of the octet sequences defined in Form Field type Values[form-field-type-values].
 
-If a field does not specify a `type` member, an Ion parser MUST use the default `type` of `string` for the field.
+If a field does not specify a `type` member, an Ion parser MUST assign a the default `type` of `string` to the field.
 
 Use of this member is OPTIONAL.
 
@@ -574,31 +602,31 @@ Use of this member is OPTIONAL.
 
 ==== `boolean`
 
-The `value` must be a JSON boolean.
+The field `value` must be a JSON boolean.
 
 ==== `date`
 
-The `value` must be a JSON string that conforms to the ISO 8601 profile defined in https://www.ietf.org/rfc/rfc3339.txt[RFC 3339].
+The field `value` must be a JSON string that conforms to the ISO 8601 profile defined in https://www.ietf.org/rfc/rfc3339.txt[RFC 3339].
 
 ==== `decimal`
 
-The `value` must be a JSON number that contains a decimal point.
+The field `value` must be a JSON number that contains a decimal point.
 
 ==== `email`
 
-The `value` must be a JSON string that is also a valid email address.
+The field `value` must be a JSON string that is also a valid email address.
 
 ==== `integer`
 
-The `value` must be a JSON number that does not contain a decimal point.
+The field `value` must be a JSON number that does not contain a decimal point.
 
 ==== `number`
 
-The `value` must be a JSON number.
+The field `value` must be a JSON number.
 
 ==== `password`
 
-The `value` must be a JSON string and user agents should mask the characters so they are not directly visible to a user.
+The field `value` must be a JSON string and user agents should mask the characters so they are not directly visible to a user.
 
 ==== `select`
 
@@ -606,7 +634,7 @@ TBD: select, radio, checkbox
 
 ==== `string`
 
-The `value` must be a JSON string.
+The field `value` must be a JSON string.
 
 == Registered Metadata Member Names
 
