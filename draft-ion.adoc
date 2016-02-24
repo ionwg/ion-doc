@@ -396,13 +396,12 @@ Ion Collection (a collection of fields).
 [[form-structure]]
 === Form Structure
 
-An Ion Form is an Ion Collection with the following additional requirements:
+An Ion Form is both an Ion Link and an Ion Collection and has the following additional requirements:
 
-1. An Ion Form's `meta` object MUST have a valid `href` member.
-2. An Ion Form's `meta` object MUST have a `rel` member that contains the octet sequence `form`.
-3. An Ion Form's `items` array MUST contain one or more Ion Form Fields.
-4. An Ion Form's `items` array MUST NOT contain elements that are not Ion Form Fields.
-5. An Ion Form's `items` array MUST NOT be `null` or empty.
+1. An Ion Form's `meta` object MUST have a `rel` member that contains one of the octet sequences `edit-form`, `create-form` or `query-form`.
+2. An Ion Form's `items` array MUST contain one or more Ion Form Fields.
+3. An Ion Form's `items` array MUST NOT contain elements that are not Ion Form Fields.
+4. An Ion Form's `items` array MUST NOT be `null` or empty.
 
 A non-normative example:
 
