@@ -55,13 +55,13 @@ HTTP is commonly used to transfer data in many different data formats. With
 the advent of the {uri-rest}[REST] architectural style, HTTP-enabled
 applications often support {uri-json}[JSON] as data format for data exchange.
 However, JSON's simple grammar can support virtually any data model - additional
-context is required for machine clients and servers to interpret data and
-metadata in important ways.
+context is required for machine clients and servers to automate information discovery
+and exchange via hypermedia controls.
 
-Ion codifies specific name/value pairs within JSON objects to better facilitate JSON-based data and metadata exchange
-between machines.  And while machine interchange is the primary goal, Ion's second most important design goal is to
-enable intuitive and context-relevant structure so Ion content is very easy to understand for humans, even if they do
-not know what Ion is.
+Ion codifies specific name/value pairs within JSON objects to better facilitate JSON-based hypermedia
+exchange between machines.  And while machine data and metadata interchange is the primary goal, Ion's second most
+important design goal is to enable intuitive and context-relevant structure so Ion content is very easy to understand
+for humans, even if they do not know what Ion is.
 
 === Terminology
 
@@ -208,7 +208,7 @@ represented as follows:
 
 ==== Example Form
 
-An Ion Form ensures that resource transitions that require data submissions can be discovered automatically
+An Ion Form ensures that resource transitions that support data submissions can be discovered automatically
 (colloquially referred to as https://en.wikipedia.org/wiki/HATEOAS[HATEOS]).
 
 .Example Ion Form
@@ -242,7 +242,7 @@ name/value pairs called 'members' and any level of nested JSON objects.
 [[metadata]]
 == Metadata
 
-An JSON object MAY contain a _Meta Object_ member named `meta`. If present, the _Meta Object_ represents data about its immediate parent JSON object. The _Meta Object_ is OPTIONAL.
+A JSON object MAY contain a _Meta Object_ member named `meta`. If present, the _Meta Object_ represents data about its immediate parent JSON object. The _Meta Object_ is OPTIONAL.
 
 An Ion parser MUST identify a member as a _Meta Object_ if and only if:
 
