@@ -52,8 +52,8 @@ Copyright (c) Les Hazlewood 2013-2016 and persons identified as document authors
 == Introduction
 
 HTTP is commonly used to transfer data in many different data formats. With the advent of the {uri-rest}[REST]
-architectural style and the success of the JavaScript programming language, HTTP-enabled applications are increasingly
-supporting {uri-json}[JSON] as a preferred data format for data exchange.
+architectural style and the success of the JavaScript programming language, HTTP-enabled applications regularly
+support {uri-json}[JSON] as a preferred data format for data exchange.
 
 However, this poses a challenge for machine data exchange at web scale across heterogeneous domains and organizations;
 JSON's simple grammar can support virtually any data model - additional context is required for machine clients and
