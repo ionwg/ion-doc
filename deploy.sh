@@ -42,6 +42,9 @@ if [ -n "${TRAVIS_PULL_REQUEST}" ] && (( "${TRAVIS_PULL_REQUEST}" > 0 )); then
     exit 0;
 fi
 
+# copy over any other site assets that need to be in the site:
+cp google19ce5eacdd2e0f09.html build
+
 # go to the build directory and create a *new* Git repo
 cd build
 git init
