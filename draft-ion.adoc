@@ -615,8 +615,6 @@ If a field does not specify a `type` member, an Ion parser MUST assign a the def
 
 If a field also contains an `options` member, and that member has a `multiple` member equal to `true`, then the field type MUST be represented as JSON array of elements of the specified type, a single value of the specified type.
 
-For example,
-
 Use of this member is OPTIONAL.
 
 ==== `value`
