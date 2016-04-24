@@ -216,10 +216,42 @@ An Ion Form ensures that resource transitions that support data submissions can 
 [source,json]
 ----
 {
-  "meta": { "href": "https://example.io/loginAttempts", "rel":["form"], "method": "POST"},
+  "meta": { "href": "https://example.io/loginAttempts", "rel":["create-form"], "method": "POST"},
   "items": [
     { "name": "username" },
-    { "name": "password", "type": "password" }
+    { "name": "password", "type": "password" },
+    { "name": "favoriteColor", "label": "Favorite Color", "options": {
+        { "label": "Red", "value": "red", "selected": true, "enabled": false },
+        { "label": "Blue", "value": "blue" }
+      }
+    },
+    { "name": "visitedContinents": "type": "string", "options": {
+        "multiple": true,
+        "items": [
+          { "label": "Africa", "value": "af" },
+          { "label": "North America", "value": "na", "selected": true },
+          { "label": "South America", "value": "sa" },
+          { "label": "Europe", "value": "eu", "selected": true },
+          { "label": "Asia", "value": "as", "selected": true }
+          { "label": "Oceania", "value": "oc" }
+          { "label": "Antarctica", "value": "an" }
+        ]
+      }
+    },
+    { "name": "favoriteContinent": "type": "string", "options": {
+        "multiple": true,
+        "control": "radio | checkbox | select | datalist",
+        "items": [
+          { "label": "Africa", "value": "af" },
+          { "label": "North America", "value": "na" },
+          { "label": "South America", "value": "sa" },
+          { "label": "Europe", "value": "eu" },
+          { "label": "Asia", "value": "as" }
+          { "label": "Oceania", "value": "oc" }
+          { "label": "Antarctica", "value": "an", "selected": true }
+        ]
+      }
+    }
   ]
 }
 ----
@@ -384,8 +416,8 @@ hypermedia client so it can collect and then submit the data.
 
 An Ion Form represents named data values that may be submitted to a linked resource location. Each named data value,
 along with any additional information (such as constraints) for that data, is collectively called a form _field_.  An
-Ion Form is then effectively a collection of _fields_ with additional metadata that controls how and where the form
-fields are to be submitted to a linked resource location.
+Ion Form is then effectively a collection of _fields_ with additional metadata that controls how the form
+fields are submitted to a linked resource location.
 
 Because a form always reflects a linked resource location, every Ion Form can also be considered an Ion Link because
 it has a `meta` `href` member.
@@ -398,7 +430,7 @@ Ion Collection (a collection of fields).
 
 An Ion Form is both an Ion Link and an Ion Collection and has the following additional requirements:
 
-1. An Ion Form's `meta` object MUST have a `rel` member that contains one of the octet sequences `edit-form`, `create-form` or `query-form`.
+1. An Ion Form's `meta` object MUST have a `rel` member that contains one of the octet sequences `form`, `edit-form`, `create-form` or `query-form`.
 2. An Ion Form's `items` array MUST contain one or more Ion Form Fields.
 3. An Ion Form's `items` array MUST NOT contain elements that are not Ion Form Fields.
 4. An Ion Form's `items` array MUST NOT be `null` or empty.
@@ -511,39 +543,13 @@ The `lt` and `lte` members are mutually exclusive - if one is declared, the othe
 
 Use of this member is OPTIONAL.
 
-==== `name`
+==== `maxlength`
 
-The `name` member is a string name assigned to the field.
+The `maxlength` member is an integer that specifies the maximum number of characters the field `value` may contain.
 
-The `name` value MUST NOT be `null`.
+==== `minlength`
 
-The `name` value MUST NOT contain only whitespace.
-
-The `name` value MUST be unique compared to any other Form Field `name` value in the containing Form's `items` array.
-
-Use of this member is REQUIRED.
-
-==== `value`
-
-The `value` member reflects the value assigned to the field.
-
-The `value` value MUST conform to the data type specified by the field `type`
-
-Use of this member is OPTIONAL.
-
-==== `pattern`
-
-The `pattern` member is a string that defines a regular expression that the field `value` must be validated against.
-
-The `pattern` member MUST NOT be specified on fields with non-string or non-date value types.
-
-Use of this member is OPTIONAL.
-
-==== `placeholder`
-
-The `placeholder` member is a short hint string that describes the expected field `value`.
-
-Use of this member is OPTIONAL.
+The `minlength` member is an integer that specifies the minimum number of characters the field `value` must contain.
 
 ==== `mutable`
 
@@ -556,6 +562,32 @@ A `false` value indicates that the field value MUST NOT be modified before it is
 If the `mutable` member is not present, or if it present and equal to `true`, the field value may be modified before it is submitted to the form's linked resource location.
 
 If a field should be considered mutable, it is RECOMMENDED to omit the `mutable` member entirely to reduce verbosity.
+
+Use of this member is OPTIONAL.
+
+==== `name`
+
+The `name` member is a string name assigned to the field.
+
+The `name` value MUST NOT be `null`.
+
+The `name` value MUST NOT contain only whitespace.
+
+The `name` value MUST be unique compared to any other Form Field `name` value in the containing Form's `items` array.
+
+Use of this member is REQUIRED.
+
+==== `pattern`
+
+The `pattern` member is a string that defines a regular expression that the field `value` must be validated against.
+
+The `pattern` member MUST NOT be specified on fields with non-string or non-date value types.
+
+Use of this member is OPTIONAL.
+
+==== `placeholder`
+
+The `placeholder` member is a short hint string that describes the expected field `value`.
 
 Use of this member is OPTIONAL.
 
@@ -573,6 +605,28 @@ If a field should not be considered required (i.e. optional), it is RECOMMENDED 
 
 Use of this member is OPTIONAL.
 
+==== `type`
+
+The `type` member specifies the mandatory data type that the `value` member must adhere to.
+
+The `type` member value is a string equal to one of the octet sequences defined in Form Field type Values[form-field-type-values].
+
+If a field does not specify a `type` member, an Ion parser MUST assign a the default `type` of `string` to the field.
+
+If a field also contains an `options` member, and that member has a `multiple` member equal to `true`, then the field type MUST be represented as JSON array of elements of the specified type, a single value of the specified type.
+
+For example,
+
+Use of this member is OPTIONAL.
+
+==== `value`
+
+The `value` member reflects the value assigned to the field.
+
+The `value` value MUST conform to the data type specified by the field `type`
+
+Use of this member is OPTIONAL.
+
 ==== `visible`
 
 The `visible` member indicates whether or not the field should be made visible by a user agent.  Fields that are not visible are usually used to retain a default value that must be submitted to the form's linked resource location.
@@ -587,18 +641,14 @@ If a field should be considered visible, it is RECOMMENDED to omit the `visible`
 
 Use of this member is OPTIONAL.
 
-==== `type`
-
-The `type` member specifies the mandatory data type that the `value` member must adhere to.
-
-The `type` member value is a string equal to one of the octet sequences defined in Form Field type Values[form-field-type-values].
-
-If a field does not specify a `type` member, an Ion parser MUST assign a the default `type` of `string` to the field.
-
-Use of this member is OPTIONAL.
-
 [[form-field-type-values]]
 === Form Field `type` Values
+
+A Form Field `type` member value MUST equal one of the following string literal values.
+
+==== `binary`
+
+The field `value` must be a JSON string that is a `base64`-encoded octet sequence according to https://tools.ietf.org/html/rfc4648[RFC 4648].
 
 ==== `boolean`
 
@@ -606,11 +656,28 @@ The field `value` must be a JSON boolean.
 
 ==== `date`
 
-The field `value` must be a JSON string that conforms to the ISO 8601 profile defined in https://www.ietf.org/rfc/rfc3339.txt[RFC 3339].
+The field `value` must be a JSON string that conforms to the `full-date` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
+
+==== `datetime`
+
+The field `value` must be a JSON string that conforms to the following https://tools.ietf.org/html/rfc5234[ABNF] grammar:
+
+    time-separator = "T" / "t"
+    datetime       = full-date time-separator partial-time
+
+where `full-date` and `partial-time` are defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
+
+==== `datetimetz`
+
+The field `value` must be a JSON string that conforms to the `date-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
 
 ==== `decimal`
 
 The field `value` must be a JSON number that contains a decimal point.
+
+==== `duration`
+
+The field `value` must be a JSON string that conforms to the `duration` grammar defined in https://tools.ietf.org/html/rfc3339#appendix-A[RFC 3339 Appendix A].
 
 ==== `email`
 
@@ -626,7 +693,7 @@ The field `value` must be a JSON number.
 
 ==== `password`
 
-The field `value` must be a JSON string and user agents should mask the characters so they are not directly visible to a user.
+The field `value` must be a JSON string and user agents MUST mask the characters so they are not visible to a user.
 
 ==== `select`
 
@@ -635,6 +702,14 @@ TBD: select, radio, checkbox
 ==== `string`
 
 The field `value` must be a JSON string.
+
+==== `time`
+
+The field `value` must be a JSON string that conforms to the `partial-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
+
+==== `timetz`
+
+The field `value` must be a JSON string that conforms to the `full-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
 
 == Registered Metadata Member Names
 
