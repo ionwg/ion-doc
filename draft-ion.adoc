@@ -544,11 +544,11 @@ Use of this member is OPTIONAL.
 
 ==== `maxlength`
 
-The `maxlength` member is an integer that specifies the maximum number of characters the field `value` may contain.
+The `maxlength` member is a non-negative integer that specifies the maximum number of characters the field `value` may contain.  If specified with the `minlength` member, the `maxlength` value MUST be greater than or equal to the `minlength` value.
 
 ==== `minlength`
 
-The `minlength` member is an integer that specifies the minimum number of characters the field `value` must contain.
+The `minlength` member is a non-negative integer that specifies the minimum number of characters the field `value` must contain. If specified with the `maxlength` member, the `minlength` value MUST be less than or equal to the `maxlength` value.
 
 ==== `mutable`
 
