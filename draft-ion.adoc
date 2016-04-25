@@ -24,7 +24,7 @@ Les Hazlewood <les@hazlewood.com>
 :uri-IANA-consideration-guidelines: https://tools.ietf.org/html/rfc5226
 :uri-semver: http://semver.org
 
-A human-friendly JSON-based hypermedia type for machine data interchange.
+An intuitive JSON-based hypermedia type for {uri-rest}[REST].
 
 .Abstract
 
