@@ -613,7 +613,7 @@ The `type` member value is a string equal to one of the octet sequences defined 
 
 If a field does not specify a `type` member, an Ion parser MUST assign a the default `type` of `string` to the field.
 
-If a field also contains an `options` member, and that member has a `multiple` member equal to `true`, then the field type MUST be represented as JSON array of elements of the specified type, a single value of the specified type.
+If a field also contains an `options` member, and that member has a `multiple` member equal to `true`, then the field type MUST be represented as JSON array of elements of the specified type.
 
 Use of this member is OPTIONAL.
 
@@ -644,9 +644,21 @@ Use of this member is OPTIONAL.
 
 A Form Field `type` member value MUST equal one of the following string literal values.
 
+==== `array`
+
+The field `value` must be a JSON array.
+
+If a Form Field has a `type` equal to `array`, that form field MAY also declare an `itemtype` member that identifies
+the type of each value in the array.
+
+If an `array` field also contains `gt`, `gte`, `lt`, `lte`, `minlength`, `maxlength` or `pattern` members, those
+members' validation rules apply to each item in the array, not the array itself.
+
+If an `array` field also declares an `options` member, the array MUST NOT contain any value that does not appear in a nested `option` `value` member.
+
 ==== `binary`
 
-The field `value` must be a JSON string that is a `base64`-encoded octet sequence according to https://tools.ietf.org/html/rfc4648[RFC 4648].
+The field `value` must be a JSON string that is a `base64`-encoded octet sequence according to https://tools.ietf.org/html/rfc4648[RFC 4648].  The string MUST NOT contain characters that are not in the `base64` alphabet.
 
 ==== `boolean`
 
