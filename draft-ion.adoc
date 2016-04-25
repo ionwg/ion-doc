@@ -28,8 +28,8 @@ An intuitive JSON-based hypermedia type for {uri-rest}[REST].
 
 .Abstract
 
-This document specifies the Ion Hypermedia Type, a simple and human-friendly
-{uri-json}[JSON]-based hypermedia type for machine data interchange.
+This document specifies the Ion Hypermedia Type, a simple and intuitive
+{uri-json}[JSON]-based hypermedia type for {uri-rest}[REST].
 
 .Status
 
@@ -62,7 +62,7 @@ servers to automate information discovery and exchange via hypermedia controls.
 Ion codifies specific name/value pairs within JSON objects to help automate JSON-based hypermedia interchange between
 machines.  And while machine data and metadata interchange is the primary goal, Ion's second most important design
 goal is to enable intuitive and context-relevant structure so Ion content is very easy to understand for humans, even
-if they do not know what Ion is.
+if they may not know what Ion is.
 
 === Terminology
 
