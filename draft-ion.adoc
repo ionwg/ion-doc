@@ -227,8 +227,7 @@ An Ion Form ensures that resource transitions that support data submissions can 
         ]
       }
     },
-    { "name": "visitedContinents": "type": "string", "options": {
-        "multiple": true,
+    { "name": "visitedContinents", "type": "string", "multiple": true, "options": {
         "items": [
           { "label": "Africa", "value": "af" },
           { "label": "North America", "value": "na", "selected": true },
@@ -240,9 +239,7 @@ An Ion Form ensures that resource transitions that support data submissions can 
         ]
       }
     },
-    { "name": "favoriteContinent": "type": "string", "options": {
-        "multiple": true,
-        "control": "radio | checkbox | select | datalist",
+    { "name": "favoriteContinent", "type": "string", "options": {
         "items": [
           { "label": "Africa", "value": "af" },
           { "label": "North America", "value": "na" },
