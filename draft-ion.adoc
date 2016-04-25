@@ -221,8 +221,10 @@ An Ion Form ensures that resource transitions that support data submissions can 
     { "name": "username" },
     { "name": "password", "type": "password" },
     { "name": "favoriteColor", "label": "Favorite Color", "options": {
-        { "label": "Red", "value": "red", "selected": true, "enabled": false },
-        { "label": "Blue", "value": "blue" }
+        "items": [
+          { "label": "Red", "value": "red", "selected": true, "enabled": false },
+          { "label": "Blue", "value": "blue" }
+        ]
       }
     },
     { "name": "visitedContinents": "type": "string", "options": {
