@@ -238,7 +238,7 @@ An Ion Form ensures that resource transitions that support data submissions can 
   "meta": { "href": "https://example.io/users", "rel":["create-form"], "method": "POST"},
   "items": [
     { "name": "username" },
-    { "name": "password", "type": "password" },
+    { "name": "password", "secret": true },
     { "name": "favoriteColor", "label": "Favorite Color", "options": {
         "items": [
           { "label": "Red", "value": "red", "selected": true, "enabled": false },
@@ -477,7 +477,7 @@ A non-normative example:
   "meta": { "href": "https://example.io/loginAttempts", "rel":["form"], "method": "POST"},
   "items": [
     { "name": "username" },
-    { "name": "password", "type": "password" }
+    { "name": "password", "secret": true }
   ]
 }
 ----
@@ -686,6 +686,22 @@ If a field should not be considered required (i.e. optional), it is RECOMMENDED 
 
 Use of this member is OPTIONAL.
 
+==== `secret`
+
+The `secret` member indicates whether or not the field value is considered sensitive information and should be kept
+secret.  User agents MUST mask the value so it is not directly visible to the user.
+
+The `secret` member is a boolean; it must equal either `true` or `false`. `null` or any other JSON value MUST NOT be specified.
+
+A `true` value indicates that the field value is considered sensitive and should be kept secret.
+
+If the `secret` member is not present, or if it present and equal to `false`, the field value is not considered
+sensitive information and does not need to be kept secret.
+
+If a field should not be considered secret, it is RECOMMENDED to omit the `secret` member entirely to reduce verbosity.
+
+Use of this member is OPTIONAL.
+
 ==== `type`
 
 The `type` member specifies the mandatory data type that the `value` member value must adhere to.  The `type` value is
@@ -788,10 +804,6 @@ A non-null `value` must be a JSON object.
 
 If the field has a `form` member, the field `value` JSON object MUST be the JSON representation that would result if
 submitting that form.
-
-==== `password`
-
-A non-null field `value` must be a JSON string and user agents MUST mask the characters so they are not visible to a user.
 
 ==== `set`
 
