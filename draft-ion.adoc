@@ -727,7 +727,7 @@ nested `option` `value` member.
 
 ==== `binary`
 
-A non-null field `value` must be a JSON string that is a `base64`-encoded octet sequence according to https://tools.ietf.org/html/rfc4648[RFC 4648].  The string MUST NOT contain characters that are not in the `base64` alphabet.
+A non-null field `value` must be a JSON string that is a `base64Url`-encoded octet sequence according to https://tools.ietf.org/html/rfc4648#section-5[RFC 4648, Section 5].  The string MUST NOT contain characters that are not in the `base64Url` alphabet.
 
 ==== `boolean`
 
