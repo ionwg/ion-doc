@@ -91,7 +91,7 @@ A JSON object with a _Meta Object_ member named `meta`.
 An Ion Object that is also a _Collection Object_.
 
 .Resource
-The referent of a {uri-IRIs}[International Resource Identifier].
+The referent of an {uri-IRIs}[International Resource Identifier].
 
 .Link
 An Ion Object where its `meta` member contains an {uri-IRIs}[IRI] member named `href`.  This is the Ion representation
@@ -246,7 +246,8 @@ An Ion Form ensures that resource transitions that support data submissions can 
         ]
       }
     },
-    { "name": "visitedContinents", "type": "set", "itemtype": "string", "minitems": 1, "options": {
+    { "name": "visitedContinents", "type": "set", "itemtype": "string", "minitems": 1,
+      "options": {
         "items": [
           { "label": "Africa", "value": "af" },
           { "label": "North America", "value": "na" },
@@ -447,7 +448,7 @@ that describe each named data value is called a _Form Field_.  An Ion Form is th
 If an Ion Form is also an Ion Link, collected data associated with the form's fields may be submitted to the Form's
 linked resource location.
 
-An Ion Form MAY NOT be an Ion Link if and only if that form is nested inside another form or form field.  Nesting forms
+An Ion Form _may not_ be an Ion Link if and only if that form is nested inside another form or form field.  Nesting forms
 allows for creation of complex object graphs that may be submitted to a single linked resource locations.
 
 An Ion Form SHOULD always also be an Ion Link if it is not nested within another form.
@@ -510,6 +511,17 @@ If a field should be considered enabled, it is RECOMMENDED to omit the `enabled`
 
 Use of this member is OPTIONAL.
 
+==== `form`
+
+The `form` member value is a nested and non-linked Form object that indicates the structure a non-null field `value`.
+This allows Ion content authors to define complex data/content graphs that may be submitted to a single linked
+resource location.
+
+Ion parsers MUST ignore a discovered `form` member if the field `type` member does not equal `object`.
+
+Ion parsers MUST ignore any discovered `meta` `href` value on nested Form objects; only the top Form in a form
+hierarchy may be submitted to a linked resource location.
+
 ==== `itemtype`
 
 The `itemtype` member specifies the mandatory data type that each value in a `value` array must adhere to. If present,
@@ -521,7 +533,7 @@ If the `type` member is not equal to `array` or `set`, an Ion parser MUST ignore
 If the `type` member equals `array` or `set` and the `itemtype` member is present, an Ion parser MUST validate any
 value in the `value` array to ensure it adheres to the specified type.
 
-If the `type` member equals `array` or `set` and the `itemtype` member is not present or equals `null, an Ion parser
+If the `type` member equals `array` or `set` and the `itemtype` member is not present or equals `null`, an Ion parser
 MUST NOT perform type validation on any value in the array before submitting the `value` to a linked resource location.
 
 Use of this member is OPTIONAL.
