@@ -575,6 +575,19 @@ equal to the field's `minitems` member value.  Ion parsers MUST ignore both the 
 
 Use of this member is OPTIONAL.
 
+==== `maxlength`
+
+The `maxlength` member is a non-negative integer that specifies the maximum number of characters the field `value`
+may contain.  Ion parsers MUST ignore any `maxlength` member that does not have a non-negative integer value.
+
+Ion parsers MUST ignore any discovered `minitems` member if the field `type` equals `object`, `array`, or `set`.
+
+If a field has both `minlength` and `maxlength` members, the field's `minlength` member value MUST be less than or
+equal to the field's `maxlength` member value.  Ion parsers MUST ignore both the `minlength` and `maxlength` members
+if the `maxlength` value is less than the `minlength` value.
+
+Use of this member is OPTIONAL.
+
 ==== `min`
 
 The `min` member indicates that the field `value` must be greater than or equal to the specified `min` value.
@@ -603,19 +616,6 @@ for that field.
 If a field has both `minitems` and `maxitems` members, the field's `minitems` member value MUST be less than or
 equal to the field's `maxitems` member value.  Ion parsers MUST ignore both the `minitems` and `maxitems` members if the
 `minitems` value is greater than the `maxitems` value.
-
-Use of this member is OPTIONAL.
-
-==== `maxlength`
-
-The `maxlength` member is a non-negative integer that specifies the maximum number of characters the field `value`
-may contain.  Ion parsers MUST ignore any `maxlength` member that does not have a non-negative integer value.
-
-Ion parsers MUST ignore any discovered `minitems` member if the field `type` equals `object`, `array`, or `set`.
-
-If a field has both `minlength` and `maxlength` members, the field's `minlength` member value MUST be less than or
-equal to the field's `maxlength` member value.  Ion parsers MUST ignore both the `minlength` and `maxlength` members
-if the `maxlength` value is less than the `minlength` value.
 
 Use of this member is OPTIONAL.
 
