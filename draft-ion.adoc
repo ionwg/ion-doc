@@ -689,11 +689,12 @@ Use of this member is OPTIONAL.
 ==== `secret`
 
 The `secret` member indicates whether or not the field value is considered sensitive information and should be kept
-secret.  User agents MUST mask the value so it is not directly visible to the user.
+secret.
 
 The `secret` member is a boolean; it must equal either `true` or `false`. `null` or any other JSON value MUST NOT be specified.
 
-A `true` value indicates that the field value is considered sensitive and should be kept secret.
+A `true` value indicates that the field value is considered sensitive and should be kept secret.  If `true`, user
+agents MUST mask the value so it is not directly visible to the user.
 
 If the `secret` member is not present, or if it present and equal to `false`, the field value is not considered
 sensitive information and does not need to be kept secret.
