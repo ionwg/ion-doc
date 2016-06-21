@@ -519,8 +519,8 @@ resource location.
 
 Ion parsers MUST ignore a discovered `form` member if the field `type` member does not equal `object`.
 
-Ion parsers MUST ignore any discovered `meta` `href` value on nested Form objects; only the top Form in a form
-hierarchy may be submitted to a linked resource location.
+Ion parsers MUST ignore any discovered `meta` `href` value on nested Form objects; only the top Form `meta` `href` in
+a form hierarchy should be used when submitting a content graph to a linked resource location.
 
 ==== `itemtype`
 
