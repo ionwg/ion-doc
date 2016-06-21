@@ -15,6 +15,7 @@ Les Hazlewood <les@hazlewood.com>
 :uri-mediaType-namingReqs: https://tools.ietf.org/html/rfc6838#section-4.2
 :uri-rfc-json-value: https://tools.ietf.org/html/rfc7159#section-3
 :uri-linkRelType-item: http://tools.ietf.org/html/rfc6573#section-2.1
+:uri-link-relation-types: http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1
 :uri-ecmaScript-5-1: http://www.ecma-international.org/ecma-262/5.1
 :uri-ecmaScript-5-1-15-12: http://www.ecma-international.org/ecma-262/5.1/#sec-15.12
 :uri-IRIs: http://tools.ietf.org/html/rfc3987
@@ -75,28 +76,35 @@ A JSON name/value pair as defined in https://tools.ietf.org/html/rfc7159#section
 A set of data that provides information about other data.
 
 .Meta Object
-A JSON object with one or more members that all represent Metadata.
+A JSON object where all members represent Metadata.
 
 .Root Object
 The single JSON object at the root of an Ion content structure.
 
+.Collection Object
+A JSON object with an array member named `items`.
+
 .Ion Object
-A JSON object with a Meta Object member named `meta`.
+A JSON object with a _Meta Object_ member named `meta`.
 
 .Ion Collection
-An Ion Object with an additional array member named `items`.
+An Ion Object that is also a _Collection Object_.
 
 .Resource
-An Ion Object that has one or more members in addition to its `meta` member.
-
-.Collection Resource
-An Ion Collection that has one or more members in addition to its `meta` and `items` members.
+The referent of a {uri-IRIs}[International Resource Identifier].
 
 .Link
-An Ion Object where its `meta` member contains an {uri-IRIs}[IRI] member named `href`.  This is the Ion representation of a {uri-links}[Web Link] that enables linking from one resource to another.
+An Ion Object where its `meta` member contains an {uri-IRIs}[IRI] member named `href`.  This is the Ion representation
+of a {uri-links}[Web Link] that enables linking from one resource to another.
+
+.Form Field
+A JSON object of members that describe data that may be collected and submitted to a linked resource location.
 
 .Form
-An Ion Collection of form fields that represent data that may be submitted to a linked resource location.
+An Collection Object where the `items` array contains Form Fields.
+
+.Linked Form
+A Form that is also a Link.  Form data submitted will be sent to the form's `meta` `href` resource location.
 
 === Media Type Name and Version
 
@@ -117,7 +125,7 @@ All following examples are non-normative.
 
 ==== Example Objects
 
-A JSON object without metadata is treated as a standard JSON object:
+A JSON object without metadata is parsed as a standard JSON object:
 
 .Example JSON Object Without Metadata
 [source,json]
@@ -129,9 +137,9 @@ A JSON object without metadata is treated as a standard JSON object:
 }
 ----
 
-An Ion _Resource_ is a JSON object with a Metadata member named `meta` in addition to one or more other members (name/value pairs):
+An _Ion Object_ is a JSON object with a _Meta Object_ member named `meta`:
 
-.Example Ion Resource
+.Example Ion Object
 [source,json]
 ----
 {
@@ -144,22 +152,33 @@ An Ion _Resource_ is a JSON object with a Metadata member named `meta` in additi
 
 ==== Example Collections
 
-An Ion Collection is an Ion Object that has an array member named `items` in addition to its `meta` member.  This `meta`
-member can reflect metadata about the items array or elements within the array, something the JSON grammar cannot do
-directly.
+A _Collection Object_ is a JSON object that has an array member named `items`:
 
-An example empty Ion Collection:
+.Example Empty Collection Object:
+[source,json]
+----
+{
+  "items": []
+}
+----
+
+An _Ion Collection_ is both an _Ion Object_ and a _Collection Object_ - it has both `items` and `meta` members.  The
+`meta` member can reflect metadata about the `items` array or elements within the array, something the JSON grammar
+cannot do directly.
+
+An example empty _Ion Collection_:
 
 .Example Empty Ion Collection:
 [source,json]
 ----
 {
-  "meta": { "href": "https://example.io/users" },
+  "meta": { "href": "https://example.io/users", "rel": ["collection"] },
   "items": []
 }
 ----
 
-Ion Collections can also support pagination, for example:
+Ion Collections can have other members to build up rich functionality.  For example, an Ion Collection that can
+support discoverable pagination:
 
 .Example Paginated Ion Collection:
 [source,javascript]
@@ -193,10 +212,10 @@ Ion Collections can also support pagination, for example:
 
 ==== Example Links
 
-An Ion Link is an Ion Object representation of a {uri-rfc5988}[web link] to another
-resource. For example, assume that someone named "Joe" is an employee of "Acme"
-corporation.  A link within the "Joe" resource to Joe's employer might be
-represented as follows:
+An _Ion Link_ is an Ion Object representation of a {uri-rfc5988}[web link] to another resource.
+
+For example, assume that someone named "Joe" is an employee of the "Acme" corporation.  A link within the "Joe"
+resource to Joe's employer might be represented as follows:
 
 .Ion Link from one resource to another:
 [source,json]
@@ -216,7 +235,7 @@ An Ion Form ensures that resource transitions that support data submissions can 
 [source,json]
 ----
 {
-  "meta": { "href": "https://example.io/loginAttempts", "rel":["create-form"], "method": "POST"},
+  "meta": { "href": "https://example.io/users", "rel":["create-form"], "method": "POST"},
   "items": [
     { "name": "username" },
     { "name": "password", "type": "password" },
@@ -227,17 +246,18 @@ An Ion Form ensures that resource transitions that support data submissions can 
         ]
       }
     },
-    { "name": "visitedContinents", "type": "string", "multiple": true, "options": {
+    { "name": "visitedContinents", "type": "set", "itemtype": "string", "minitems": 1, "options": {
         "items": [
           { "label": "Africa", "value": "af" },
-          { "label": "North America", "value": "na", "selected": true },
+          { "label": "North America", "value": "na" },
           { "label": "South America", "value": "sa" },
-          { "label": "Europe", "value": "eu", "selected": true },
-          { "label": "Asia", "value": "as", "selected": true }
+          { "label": "Europe", "value": "eu" },
+          { "label": "Asia", "value": "as" }
           { "label": "Oceania", "value": "oc" }
           { "label": "Antarctica", "value": "an" }
         ]
-      }
+      },
+      "value": ["na", "eu", "as", "an"]
     },
     { "name": "favoriteContinent", "type": "string", "options": {
         "items": [
@@ -259,8 +279,9 @@ An Ion Form ensures that resource transitions that support data submissions can 
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described {uri-rfc2119}[RFC2119] when they appear in UPPERCASE.  If these words are used without being spelled in uppercase then they are
-to be interpreted with their normal natural language meanings, without any normative meaning.
+"OPTIONAL" in this document are to be interpreted as described {uri-rfc2119}[RFC2119] when they appear in UPPERCASE.
+If these words are used without being spelled in uppercase then they are to be interpreted with their normal natural
+language meanings, without any normative meaning.
 
 
 [[content-structure]]
@@ -274,39 +295,45 @@ name/value pairs called 'members' and any level of nested JSON objects.
 [[metadata]]
 == Metadata
 
-A JSON object MAY contain a _Meta Object_ member named `meta`. If present, the _Meta Object_ represents data about its immediate parent JSON object. The _Meta Object_ is OPTIONAL.
+A JSON object MAY contain a _Meta Object_ member named `meta`. If present, the _Meta Object_ represents data about its
+immediate parent JSON object. A `meta` member is OPTIONAL.
 
 An Ion parser MUST identify a member as a _Meta Object_ if and only if:
 
 1. The member name is equal to the case-sensitive octet sequence `meta` and
 2. The member value is a JSON Object that has one or more members.
 
-If a member name is equal to the case-sensitive octet sequence `meta` and the member value is NOT a JSON Object (i.e. it is an array, number, string or the octet sequence literals `null`, `false`, or `true` as defined by {uri-rfc-json-value}[RFC 7159, Section 3]), an Ion parser MUST NOT identify the member as a _Meta Object_.
+If a member name is equal to the case-sensitive octet sequence `meta` and the member value is NOT a JSON Object (i.e.
+it is an array, number, string or the octet sequence literals `null`, `false`, or `true` as defined by
+{uri-rfc-json-value}[RFC 7159, Section 3]), an Ion parser MUST NOT identify the member as a _Meta Object_.
 
-If a member name is equal to the case-sensitive octet sequence `meta` and the member value is an empty JSON Object with no members, an Ion parser MUST NOT identify the member as a _Meta Object_.
+If a member name is equal to the case-sensitive octet sequence `meta` and the member value is an empty JSON Object with
+no members, an Ion parser MUST NOT identify the member as a _Meta Object_.
 
-If a member name is not equal to the case-sensitive octet sequence `meta`, an Ion parser MUST NOT identify a member as a _Meta Object_.
+If a member name is not equal to the case-sensitive octet sequence `meta`, an Ion parser MUST NOT identify a member as
+a _Meta Object_.
 
-The member names within an identified _Meta Object_ MUST be unique; Ion parsers MUST either
-reject _Meta Object_ members with duplicate member names or use a JSON
-parser that returns only the lexically last duplicate member, as specified
-in {uri-ecmaScript-5-1-15-12}[Section 15.12 (The JSON Object)] of {uri-ecmaScript-5-1}[ECMAScript 5.1].
+The member names within an identified _Meta Object_ MUST be unique; Ion parsers MUST either reject _Meta Object_
+members with duplicate member names or use a JSON parser that returns only the lexically last duplicate member, as
+specified in {uri-ecmaScript-5-1-15-12}[Section 15.12 (The JSON Object)] of {uri-ecmaScript-5-1}[ECMAScript 5.1].
 
-A _Meta Object_ MAY contain members that are not defined in the Ion Metadata Member Registry.  Any member not understood by an Ion parser SHOULD be ignored.
+A _Meta Object_ MAY contain members that are not defined in the Ion Metadata Member Registry.  Any member not
+understood by an Ion parser SHOULD be ignored.
 
 [[links]]
 == Links
 
-An Ion Link is an Ion Object where its `meta` member contains an {uri-IRIs}[IRI] member named `href`. An Ion Link therefore is a JSON serialization of a {uri-rfc5988}[web link] to another resource.
+An Ion Link is an Ion Object where the `meta` member contains an {uri-IRIs}[IRI] member named `href`. An Ion Link
+therefore is a JSON serialization of a {uri-rfc5988}[web link] to another resource.
 
-An Ion parser MUST identify a member as an _Ion Link_ if:
+An Ion parser MUST identify a JSON object as an _Ion Link_ if:
 
 1. The member is a _Meta Object_ as defined in Section 3 and
 2. The Meta Object contains an {uri-IRIs}[IRI] member with a name equal to the case-sensitive octet sequence `href`.
 
-If the Meta Object `href` value is `null`, not a string, an empty string, or a whitespace-only (blank) string, an Ion parser MUST NOT identify the member as an _Ion Link_.
+If the Meta Object `href` value is `null`, not a string, an empty string, or a whitespace-only (blank) string, an Ion parser MUST NOT identify the object as an _Ion Link_.
 
-It is possible for an Ion Object to be both an _Ion Resource_ and an _Ion Link_ if both respective parsing conditions are satisfied.
+An _Ion Link_ MAY have additional members other than the `meta` member.
 
 A non-normative example of a minimal Ion link:
 
@@ -316,9 +343,9 @@ A non-normative example of a minimal Ion link:
 { "meta": { "href": "https://example.io/corporations/acme" } }
 ----
 
-A non-normative example of an Ion Object that is both an Ion Resource and an Ion Link:
+A non-normative example of an Ion Link that also has other members:
 
-.Example Ion Object that is both an Ion Resource and an Ion Link:
+.Example Ion Object that is also an Ion Link:
 [source,json]
 ----
 {
@@ -329,7 +356,7 @@ A non-normative example of an Ion Object that is both an Ion Resource and an Ion
 
 === Link Relation Types
 
-All Ion links have one or more <<links, link relation types>>.  A link's total set of link relation types is the set union of the link's implicit link relation type and the link's explicit link relation types.
+All Ion links have one or more {uri-link-relation-types}[Link Relation Types].  A link's total set of link relation types is the set union of the link's implicit link relation type and the link's explicit link relation types.
 
 ==== Implicit Link Relation Type
 
@@ -370,7 +397,7 @@ The above example shows an Ion Link member named `employer`.  The octet sequence
 
 ===== Collection Item Implicit Link Relation Type
 
-Any Ion Link in an Ion Collection's `items` array is implicitly assigned the {uri-linkRelType-item}[`item`] link relation type.
+Any Ion Link in a _Collection Object_'s `items` array is implicitly assigned the {uri-linkRelType-item}[`item`] link relation type.
 
 A non-normative example:
 
@@ -385,11 +412,11 @@ A non-normative example:
 }
 ----
 
-The above example has 2 Ion Links in its `items` array.  Each of these 2 links are implicitly assigned the {uri-linkRelType-item}[`item`] link relation type.
+The above example has 2 Links in its `items` array.  Each of these 2 links are implicitly assigned the {uri-linkRelType-item}[`item`] link relation type.
 
 ==== Explicit Link Relation Types
 
-An Ion link MAY have one or more explicitly defined link relation types declared as an array of strings assigned to the link Meta Object's `rel` member.
+An Ion Link MAY have one or more explicitly defined link relation types declared as an array of strings assigned to the link Meta Object's `rel` member.
 
 A non-normative example of a link with an explicitly defined link relation type:
 
@@ -405,7 +432,7 @@ More than one explicit link relation type MAY be defined in the `rel` array.
 
 Ion parsers MUST NOT recognize any non-string value in the `rel` array as a link relation type.
 
-Ion parsers MUST treat null or empty `rel` values as if the `rel` property was not defined at all.
+Ion parsers MUST ignore any Link `rel` member with a null or empty value.
 
 [[forms]]
 == Forms
@@ -413,26 +440,33 @@ Ion parsers MUST treat null or empty `rel` values as if the `rel` property was n
 If data can be submitted to a linked resource location, information about that data must be made available to a
 hypermedia client so it can collect and then submit the data.
 
-An Ion Form represents named data values that may be submitted to a linked resource location. Each named data value,
-along with any additional information (such as constraints) for that data, is collectively called a form _field_.  An
-Ion Form is then effectively a collection of _fields_ with additional metadata that controls how the form
-fields are submitted to a linked resource location.
+An Ion Form represents named data values that may be submitted to a linked resource location. A JSON object of members
+that describe each named data value is called a _Form Field_.  An Ion Form is then effectively a collection of form
+ fields with additional metadata that controls how the form fields are submitted to a linked resource location.
 
-Because a form always reflects a linked resource location, every Ion Form can also be considered an Ion Link because
-it has a `meta` `href` member.
+If an Ion Form is also an Ion Link, collected data associated with the form's fields may be submitted to the Form's
+linked resource location.
 
-Additionally, because every Ion Form has metadata and array of fields, every Ion Form is therefore also an
-Ion Collection (a collection of fields).
+An Ion Form MAY NOT be an Ion Link if and only if that form is nested inside another form or form field.  Nesting forms
+allows for creation of complex object graphs that may be submitted to a single linked resource locations.
+
+An Ion Form SHOULD always also be an Ion Link if it is not nested within another form.
 
 [[form-structure]]
 === Form Structure
 
-An Ion Form is both an Ion Link and an Ion Collection and has the following additional requirements:
+Ion parsers MUST identify any JSON object as an Ion Form if the object matches the following conditions:
 
-1. An Ion Form's `meta` object MUST have a `rel` member that contains one of the octet sequences `form`, `edit-form`, `create-form` or `query-form`.
-2. An Ion Form's `items` array MUST contain one or more Ion Form Fields.
-3. An Ion Form's `items` array MUST NOT contain elements that are not Ion Form Fields.
-4. An Ion Form's `items` array MUST NOT be `null` or empty.
+1. Either:
+  a. The JSON object is discovered to be an Ion Link as defined in <<links, Section 4>> AND its `meta` member has
+     an internal `rel` member that contains one of the octet sequences `form`, `edit-form`, `create-form` or
+     `query-form`, OR:
+  b. The JSON object a member in an Ion Form Field named `form`.
+1. The JSON object has an `items` array member with a value that is not `null` or empty.
+1. The JSON object's `items` array contains one or more Ion Form Field objects.
+1. The JSON object's `items` array does not contain elements that are not Ion Form Field objects.
+
+Ion parsers MUST NOT identify a JSON object as an Ion Form if the object does not match the above conditions.
 
 A non-normative example:
 
@@ -464,45 +498,31 @@ An Ion Form Field has one or more of the following members.
 
 ==== `enabled`
 
-The `enabled` member indicates whether or not the field `value` may be modified or submitted to the form's linked resource location.
+The `enabled` member indicates whether or not the field `value` may be modified or submitted to a linked resource location.
 
 The `enabled` member is a boolean; it must equal either `true` or `false`. `null` or any other JSON value MUST NOT be specified.
 
-A `false` value indicates that the field value MUST NOT be modified or submitted to the form's linked resource location.
+A `false` value indicates that the field value MUST NOT be modified or submitted to a linked resource location.
 
-If the `enabled` member is not present, or if it present and equal to `true`, the field may be modified or submitted to the form's linked resource location.
+If the `enabled` member is not present, or if it present and equal to `true`, the field may be modified or submitted a linked resource location.
 
 If a field should be considered enabled, it is RECOMMENDED to omit the `enabled` member entirely to reduce verbosity.
 
 Use of this member is OPTIONAL.
 
-==== `gt`
+==== `itemtype`
 
-The `gt` member indicates that the field `value` must be greater than the specified `gt` member value.
+The `itemtype` member specifies the mandatory data type that each value in a `value` array must adhere to. If present,
+the `itemtype` member value MUST equal one of the octet sequences defined in
+<<Form Field `type` Values, Form Field `type` Values>>.
 
-The `gt` member is a date or a number. The `gt` value MUST conform to the data type specified by the field `type`.
-This member MUST NOT be used with a non-date or non-number field `type`.
+If the `type` member is not equal to `array` or `set`, an Ion parser MUST ignore the `itemtype` member.
 
-If the `gt` member is present, the field `value` must be greater than the `gt` value.
+If the `type` member equals `array` or `set` and the `itemtype` member is present, an Ion parser MUST validate any
+value in the `value` array to ensure it adheres to the specified type.
 
-If the `gt` member is not present, there is no 'greater than' restriction on the field `value`.
-
-The `gt` and `gte` members are mutually exclusive - if one is declared, the other MUST NOT be declared.
-
-Use of this member is OPTIONAL.
-
-==== `gte`
-
-The `gte` member indicates that the field `value` must be greater than or equal to the specified `gte` member value.
-
-The `gte` member is a date or a number. The `gte` value MUST conform to the data type specified by the field `type`.
-This member MUST NOT be used with a non-date or non-number field `type`.
-
-If the `gte` member is present, the field `value` must be greater than or equal to the `gte` value.
-
-If the `gte` member is not present, there is no 'greater than or equal to' restriction on the field `value`.
-
-The `gt` and `gte` members are mutually exclusive - if one is declared, the other MUST NOT be declared.
+If the `type` member equals `array` or `set` and the `itemtype` member is not present or equals `null, an Ion parser
+MUST NOT perform type validation on any value in the array before submitting the `value` to a linked resource location.
 
 Use of this member is OPTIONAL.
 
@@ -512,43 +532,93 @@ The `label` member is a string description of the field that may be used to enha
 
 Use of this member is OPTIONAL.
 
-==== `lt`
+==== `max`
 
-The `lt` member indicates that the field `value` must be less than the specified `lt` member value.
+The `max` member indicates that the field `value` must be less than or equal to the specified `max` value.
 
-The `lt` member is a date or a number. The `lt` value MUST conform to the data type specified by the field `type`.
-This member MUST NOT be used with a non-date or non-number field `type`.
+The `max` member value must conform to the data type defined by the `type` member value; Ion parsers MUST ignore
+any `max` member where the `max` value does not conform to the `type` data type.
 
-If the `lt` member is present, the field `value` must be less than the `lt` value.
+The `max` member value may only be defined when the `type` value is equal to `number`, `integer`, `decimal`, `date`,
+`datetime`, `datetimetz`, `time`, or `timetz` as defined in <<Form Field `type` Values, Form Field `type` Values>>.  Ion
+parsers MUST ignore any `max` member if the `type` member value does not match one of these values.
 
-If the `lt` member is not present, there is no 'less than' restriction on the field `value`.
-
-The `lt` and `lte` members are mutually exclusive - if one is declared, the other MUST NOT be declared.
+If the `min` member is present, the `max` value must be greater than or equal to the `min` value.  Ion parsers
+MUST ignore both the `min` member and the `max` member if the `max` value is less than the `min` value.
 
 Use of this member is OPTIONAL.
 
-==== `lte`
+==== `maxitems`
 
-The `lte` member indicates that the field `value` must be less than or equal to the specified `lte` member value.
+The `maxitems` member value is non-negative integer that specifies the maximum number of field values that may be
+submitted when the field `type` value equals `array` or `set`.  Ion parsers MUST ignore any `maxitems` member that does
+not have a non-negative integer value.
 
-The `lte` member is a date or a number. The `lte` value MUST conform to the data type specified by the field `type`.
-This member MUST NOT be used with a non-date or non-number field `type`.
+If the field `type` value does not equal `array` or `set`, an Ion parser MUST ignore any discovered `maxitems` member
+for that field.
 
-If the `lte` member is present, the field `value` must be less than or equal to the `lte` value.
+If a field has both `minitems` and `maxitems` members, the field's `maxitems` member value MUST be greater than or
+equal to the field's `minitems` member value.  Ion parsers MUST ignore both the `minitems` and `maxitems` members if the
+`maxitems` value is less than the `minitems` value.
 
-If the `lte` member is not present, there is no 'less than or equal to' restriction on the field `value`.
+Use of this member is OPTIONAL.
 
-The `lt` and `lte` members are mutually exclusive - if one is declared, the other MUST NOT be declared.
+==== `min`
+
+The `min` member indicates that the field `value` must be greater than or equal to the specified `min` value.
+
+The `min` member value must conform to the data type defined by the `type` member value; Ion parsers MUST ignore
+any `min` member where the `min` value does not conform to the `type` data type.
+
+The `min` member value may only be defined when the `type` value is `number`, `integer`, `decimal`, `date`,
+`datetime`, `datetimetz`, `time`, or `timetz` as defined in <<Form Field `type` Values, Form Field `type` Values>>.  Ion
+parsers MUST ignore any `min` member if the `type` member value does not match one of these values.
+
+If the `max` member is present, the `min` value must be less than or equal to the `max` value.  Ion parsers
+MUST ignore both the `min` member and the `max` member if the `min` value is greater than the `max` value.
+
+Use of this member is OPTIONAL.
+
+==== `minitems`
+
+The `minitems` member value is non-negative integer that specifies the minimum number of field values that may be
+submitted when the field `type` value equals `array` or `set`.  Ion parsers MUST ignore any `minitems` member that does
+not have a non-negative integer value.
+
+If the field `type` value does not equal `array` or `set`, an Ion parser MUST ignore any discovered `minitems` member
+for that field.
+
+If a field has both `minitems` and `maxitems` members, the field's `minitems` member value MUST be less than or
+equal to the field's `maxitems` member value.  Ion parsers MUST ignore both the `minitems` and `maxitems` members if the
+`minitems` value is greater than the `maxitems` value.
 
 Use of this member is OPTIONAL.
 
 ==== `maxlength`
 
-The `maxlength` member is a non-negative integer that specifies the maximum number of characters the field `value` may contain.  If specified with the `minlength` member, the `maxlength` value MUST be greater than or equal to the `minlength` value.
+The `maxlength` member is a non-negative integer that specifies the maximum number of characters the field `value`
+may contain.  Ion parsers MUST ignore any `maxlength` member that does not have a non-negative integer value.
+
+Ion parsers MUST ignore any discovered `minitems` member if the field `type` equals `object`, `array`, or `set`.
+
+If a field has both `minlength` and `maxlength` members, the field's `minlength` member value MUST be less than or
+equal to the field's `maxlength` member value.  Ion parsers MUST ignore both the `minlength` and `maxlength` members
+if the `maxlength` value is less than the `minlength` value.
+
+Use of this member is OPTIONAL.
 
 ==== `minlength`
 
-The `minlength` member is a non-negative integer that specifies the minimum number of characters the field `value` must contain. If specified with the `maxlength` member, the `minlength` value MUST be less than or equal to the `maxlength` value.
+The `minlength` member is a non-negative integer that specifies the minimum number of characters the field `value`
+must contain.  Ion parsers MUST ignore any `minlength` member that does not have a non-negative integer value.
+
+Ion parsers MUST ignore any discovered `minlength` member if the field `type` equals `object`, `array`, or `set`.
+
+If a field has both `minlength` and `maxlength` members, the field's `minlength` member value MUST be less than or
+equal to the field's `maxlength` member value.  Ion parsers MUST ignore both the `minlength` and `maxlength` members
+if the `minlength` value is greater than the `maxlength` value.
+
+Use of this member is OPTIONAL.
 
 ==== `mutable`
 
@@ -606,13 +676,12 @@ Use of this member is OPTIONAL.
 
 ==== `type`
 
-The `type` member specifies the mandatory data type that the `value` member must adhere to.
+The `type` member specifies the mandatory data type that the `value` member value must adhere to.  The `type` value is
+a string and must equal to one of the octet sequences defined in <<Form Field `type` Values, Form Field `type` Values>>.
 
-The `type` member value is a string equal to one of the octet sequences defined in Form Field type Values[form-field-type-values].
+If the `type` member is not present, an Ion parser MUST assume a default `type` of `string` for the field.
 
-If a field does not specify a `type` member, an Ion parser MUST assign a the default `type` of `string` to the field.
-
-If a field also contains an `options` member, and that member has a `multiple` member equal to `true`, then the field type MUST be represented as JSON array of elements of the specified type.
+An Ion parser MUST validate the `value` member value to ensure it adheres to the specified (or default) type.
 
 Use of this member is OPTIONAL.
 
@@ -620,7 +689,10 @@ Use of this member is OPTIONAL.
 
 The `value` member reflects the value assigned to the field.
 
-The `value` value MUST conform to the data type specified by the field `type`
+If the `type` member exists and does not equal `array` or `set, the `value` member value MUST conform to the data type
+specified by the `type` member value.
+
+If the `type` member exists and is equal to `array` or `set`, the `value` member value MUST be a JSON array.
 
 Use of this member is OPTIONAL.
 
@@ -645,31 +717,29 @@ A Form Field `type` member value MUST equal one of the following string literal 
 
 ==== `array`
 
-The field `value` must be a JSON array.
+A non-null field `value` must be a JSON array.
 
-If a Form Field has a `type` equal to `array`, that form field MAY also declare an `itemtype` member that identifies
-the type of each value in the array.
-
-If an `array` field also contains `gt`, `gte`, `lt`, `lte`, `minlength`, `maxlength` or `pattern` members, those
+If an `array` field also contains `min`, `minlength`, `max`, `maxlength` or `pattern` members, those
 members' validation rules apply to each item in the array, not the array itself.
 
-If an `array` field also declares an `options` member, the array MUST NOT contain any value that does not appear in a nested `option` `value` member.
+If an `array` field also declares an `options` member, the array MUST NOT contain any value that does not appear in a
+nested `option` `value` member.
 
 ==== `binary`
 
-The field `value` must be a JSON string that is a `base64`-encoded octet sequence according to https://tools.ietf.org/html/rfc4648[RFC 4648].  The string MUST NOT contain characters that are not in the `base64` alphabet.
+A non-null field `value` must be a JSON string that is a `base64`-encoded octet sequence according to https://tools.ietf.org/html/rfc4648[RFC 4648].  The string MUST NOT contain characters that are not in the `base64` alphabet.
 
 ==== `boolean`
 
-The field `value` must be a JSON boolean.
+A non-null field `value` must be a JSON boolean.
 
 ==== `date`
 
-The field `value` must be a JSON string that conforms to the `full-date` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
+A non-null field `value` must be a JSON string that conforms to the `full-date` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
 
 ==== `datetime`
 
-The field `value` must be a JSON string that conforms to the following https://tools.ietf.org/html/rfc5234[ABNF] grammar:
+A non-null field `value` must be a JSON string that conforms to the following https://tools.ietf.org/html/rfc5234[ABNF] grammar:
 
     time-separator = "T" / "t"
     datetime       = full-date time-separator partial-time
@@ -678,47 +748,61 @@ where `full-date` and `partial-time` are defined in https://tools.ietf.org/html/
 
 ==== `datetimetz`
 
-The field `value` must be a JSON string that conforms to the `date-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
+A non-null field `value` must be a JSON string that conforms to the `date-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
 
 ==== `decimal`
 
-The field `value` must be a JSON number that contains a decimal point.
+A non-null field `value` must be a JSON number that contains a decimal point (aka the Period `.` character, ASCII code 46).
 
 ==== `duration`
 
-The field `value` must be a JSON string that conforms to the `duration` grammar defined in https://tools.ietf.org/html/rfc3339#appendix-A[RFC 3339 Appendix A].
+A non-null field `value` must be a JSON string that conforms to the `duration` grammar defined in https://tools.ietf.org/html/rfc3339#appendix-A[RFC 3339 Appendix A].
 
 ==== `email`
 
-The field `value` must be a JSON string that is also a valid email address.
+A non-null field `value` must be a JSON string that is also a valid email address.
 
 ==== `integer`
 
-The field `value` must be a JSON number that does not contain a decimal point.
+A non-null field `value` must be a JSON number that does not contain a decimal point (aka the Period `.` character, ASCII code 46).
 
 ==== `number`
 
-The field `value` must be a JSON number.
+A non-null `value` must be a JSON number.
+
+==== `object`
+
+A non-null `value` must be a JSON object.
+
+If the field has a `form` member, the field `value` JSON object MUST be the JSON representation that would result if
+submitting that form.
 
 ==== `password`
 
-The field `value` must be a JSON string and user agents MUST mask the characters so they are not visible to a user.
+A non-null field `value` must be a JSON string and user agents MUST mask the characters so they are not visible to a user.
 
-==== `select`
+==== `set`
 
-TBD: select, radio, checkbox
+The field `value` must be a JSON array AND that JSON array MUST NOT contain any element that is equal to any other
+element within the same array, where element equality is defined in Appendix A.
+
+If a `set` field also contains `min`, `minlength`, `max, `maxlength` or `pattern` members, those
+members' validation rules apply to each item in the set array, not the set array itself.
+
+If a `set` field also declares an `options` member, the set array MUST NOT contain any value that does not appear in a
+nested `option` `value` member.
 
 ==== `string`
 
-The field `value` must be a JSON string.
+A non-null field `value` must be a JSON string.
 
 ==== `time`
 
-The field `value` must be a JSON string that conforms to the `partial-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
+A non-null field `value` must be a JSON string that conforms to the `partial-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
 
 ==== `timetz`
 
-The field `value` must be a JSON string that conforms to the `full-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
+A non-null field `value` must be a JSON string that conforms to the `full-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
 
 == Registered Metadata Member Names
 
@@ -848,9 +932,20 @@ of the relevant sections may also be included but is not required.
 [appendix]
 == Appendix
 
-Acknowledgements
+=== A: JSON value equality
 
-The authors acknowledge that the design of the Ion data format was initially influenced by design concepts in https://tools.ietf.org/html/rfc4287[RFC 4287, The Atom Syndication Format], specifically the parallels between Atom's 'Entry' and 'Container' concepts and Ion's 'Resource' and 'Collection Resource' concepts, respectively.  The name 'Ion' is a playful nod to the Atom name, honoring this heritage.
+Two JSON values are equal if and only if both are:
+
+- `null`, or
+- boolean and have the same boolean value, or
+- strings and have the same octet sequence, or
+- numbers and have the same mathematical value, or
+- arrays and have the same number of items, and items at the same index are equal according to this definition, or
+- objects and have the same property names, and values for the same property name are equal according to this definition.
+
+=== B: Acknowledgements
+
+The authors acknowledge that the design of the Ion data format was initially influenced by design concepts in https://tools.ietf.org/html/rfc4287[RFC 4287, The Atom Syndication Format], specifically the parallels between Atom's 'Entry' and 'Container' concepts and Ion's 'Ion Object' and 'Ion Collection' concepts, respectively.  The name 'Ion' is a playful nod to the Atom name, honoring this heritage.
 
 Ion's `meta` member concept was largely influenced by a discussion on JSON linking between Tim Berners-Lee and Mark Nottingham as described in Mark Nottingham's https://www.mnot.net/blog/2011/11/25/linking_in_json[Linking In JSON blog post].  The Ion `meta` concept codifies this idea and defines a registry for `meta` members useful for hypermedia interchange.
 
