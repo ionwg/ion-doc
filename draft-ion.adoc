@@ -513,8 +513,8 @@ Use of this member is OPTIONAL.
 
 ==== `form`
 
-The `form` member value is a nested and non-linked Form object that indicates the structure a non-null field `value`.
-This allows Ion content authors to define complex data/content graphs that may be submitted to a single linked
+The `form` member value is a nested and non-linked Form object that indicates the structure a non-null field `value`
+object. This allows Ion content authors to define complex data/content graphs that may be submitted to a single linked
 resource location.
 
 Ion parsers MUST ignore a discovered `form` member if the field `type` member does not equal `object`.
