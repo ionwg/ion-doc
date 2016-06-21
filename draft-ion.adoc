@@ -957,7 +957,7 @@ of the relevant sections may also be included but is not required.
 [appendix]
 == Appendix
 
-=== A: JSON value equality
+=== JSON value equality
 
 Two JSON values are equal if and only if both are:
 
@@ -968,7 +968,7 @@ Two JSON values are equal if and only if both are:
 - arrays and have the same number of items, and items at the same index are equal according to this definition, or
 - objects and have the same property names, and values for the same property name are equal according to this definition.
 
-=== B: Acknowledgements
+=== Acknowledgements
 
 The authors acknowledge that the design of the Ion data format was initially influenced by design concepts in https://tools.ietf.org/html/rfc4287[RFC 4287, The Atom Syndication Format], specifically the parallels between Atom's 'Entry' and 'Container' concepts and Ion's 'Ion Object' and 'Ion Collection' concepts, respectively.  The name 'Ion' is a playful nod to the Atom name, honoring this heritage.
 
