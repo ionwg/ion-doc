@@ -462,9 +462,9 @@ Ion parsers MUST identify any JSON object as an Ion Form if the object matches t
      an internal `rel` member that contains one of the octet sequences `form`, `edit-form`, `create-form` or
      `query-form`, OR:
   b. The JSON object a member in an Ion Form Field named `form`.
-1. The JSON object has an `items` array member with a value that is not `null` or empty.
-1. The JSON object's `items` array contains one or more Ion Form Field objects.
-1. The JSON object's `items` array does not contain elements that are not Ion Form Field objects.
+2. The JSON object has an `items` array member with a value that is not `null` or empty.
+3. The JSON object's `items` array contains one or more Ion Form Field objects.
+4. The JSON object's `items` array does not contain elements that are not Ion Form Field objects.
 
 Ion parsers MUST NOT identify a JSON object as an Ion Form if the object does not match the above conditions.
 
