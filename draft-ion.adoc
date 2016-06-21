@@ -548,7 +548,7 @@ Use of this member is OPTIONAL.
 
 The `max` member indicates that the field `value` must be less than or equal to the specified `max` value.
 
-The `max` member value must conform to the data type defined by the `type` member value; Ion parsers MUST ignore
+The `max` member value MUST conform to the data type defined by the `type` member value; Ion parsers MUST ignore
 any `max` member where the `max` value does not conform to the `type` data type.
 
 The `max` member value may only be defined when the `type` value is equal to `number`, `integer`, `decimal`, `date`,
@@ -562,7 +562,7 @@ Use of this member is OPTIONAL.
 
 ==== `maxitems`
 
-The `maxitems` member value is non-negative integer that specifies the maximum number of field values that may be
+The `maxitems` member value is a non-negative integer that specifies the maximum number of field values that may be
 submitted when the field `type` value equals `array` or `set`.  Ion parsers MUST ignore any `maxitems` member that does
 not have a non-negative integer value.
 
@@ -592,7 +592,7 @@ Use of this member is OPTIONAL.
 
 The `min` member indicates that the field `value` must be greater than or equal to the specified `min` value.
 
-The `min` member value must conform to the data type defined by the `type` member value; Ion parsers MUST ignore
+The `min` member value MUST conform to the data type defined by the `type` member value; Ion parsers MUST ignore
 any `min` member where the `min` value does not conform to the `type` data type.
 
 The `min` member value may only be defined when the `type` value is `number`, `integer`, `decimal`, `date`,
@@ -606,7 +606,7 @@ Use of this member is OPTIONAL.
 
 ==== `minitems`
 
-The `minitems` member value is non-negative integer that specifies the minimum number of field values that may be
+The `minitems` member value is a non-negative integer that specifies the minimum number of field values that may be
 submitted when the field `type` value equals `array` or `set`.  Ion parsers MUST ignore any `minitems` member that does
 not have a non-negative integer value.
 
