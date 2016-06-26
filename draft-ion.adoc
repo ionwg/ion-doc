@@ -100,6 +100,9 @@ of a {uri-links}[Web Link] that enables linking from one resource to another.
 .Form Field
 A JSON object of members that describe data that may be collected and submitted to a linked resource location.
 
+.Form Field Option
+A JSON object within a Form Field `options` member's `items` array.
+
 .Form
 An Collection Object where the `items` array contains Form Fields.
 
@@ -241,13 +244,12 @@ An Ion Form ensures that resource transitions that support data submissions can 
     { "name": "password", "secret": true },
     { "name": "favoriteColor", "label": "Favorite Color", "options": {
         "items": [
-          { "label": "Red", "value": "red", "selected": true, "enabled": false },
+          { "label": "Red", "value": "red" },
           { "label": "Blue", "value": "blue" }
         ]
       }
     },
-    { "name": "visitedContinents", "type": "set", "itemtype": "string", "minitems": 1,
-      "options": {
+    { "name": "visitedContinents", "type": "set", "minitems": 1, "maxitems": 7, "options": {
         "items": [
           { "label": "Africa", "value": "af" },
           { "label": "North America", "value": "na" },
@@ -257,10 +259,9 @@ An Ion Form ensures that resource transitions that support data submissions can 
           { "label": "Oceania", "value": "oc" }
           { "label": "Antarctica", "value": "an" }
         ]
-      },
-      "value": ["na", "eu", "as", "an"]
+      }
     },
-    { "name": "favoriteContinent", "type": "string", "options": {
+    { "name": "favoriteContinent", "options": {
         "items": [
           { "label": "Africa", "value": "af" },
           { "label": "North America", "value": "na" },
@@ -268,7 +269,7 @@ An Ion Form ensures that resource transitions that support data submissions can 
           { "label": "Europe", "value": "eu" },
           { "label": "Asia", "value": "as" }
           { "label": "Oceania", "value": "oc" }
-          { "label": "Antarctica", "value": "an", "selected": true }
+          { "label": "Antarctica", "value": "an" }
         ]
       }
     }
@@ -462,7 +463,7 @@ Ion parsers MUST identify any JSON object as an Ion Form if the object matches t
   a. The JSON object is discovered to be an Ion Link as defined in <<links, Section 4>> AND its `meta` member has
      an internal `rel` member that contains one of the octet sequences `form`, `edit-form`, `create-form` or
      `query-form`, OR:
-  b. The JSON object a member in an Ion Form Field named `form`.
+  b. The JSON object is a member named `form` inside an Ion Form Field.
 2. The JSON object has an `items` array member with a value that is not `null` or empty.
 3. The JSON object's `items` array contains one or more Ion Form Field objects.
 4. The JSON object's `items` array does not contain elements that are not Ion Form Field objects.
@@ -485,7 +486,8 @@ A non-normative example:
 [[form-fields]]
 === Form Fields
 
-An Ion Form Field is a JSON object in an Ion Form's `items` array.
+An Ion Form Field is a JSON object in an Ion Form's `items` array that contains one or more
+<<form-field-members, Form Field Members>>.
 
 An Ion Form Field MUST have a string member named `name`.
 
@@ -658,6 +660,70 @@ The `name` value MUST be unique compared to any other Form Field `name` value in
 
 Use of this member is REQUIRED.
 
+==== `options`
+
+The `options` member is a Collection Object where the `items` array contains _Form Field Option_ objects.  A Form Field
+Option object contains one or more members defined in <<form-field-option-members,Form Field Option Members>>.
+
+When an `options` member is present, the form field `value` MUST be restricted to contain only values found within
+Option `value` members.
+
+If a field allows a single value and does not define a `type` member, an Ion parser MUST default the field `type` to be
+equal to the type discovered by inspecting the first Option's `value` member value.
+
+For example, consider the following form field:
+
+.Example Form Field with Options:
+[source,json]
+----
+{ "name": "favoriteContinent", "options": {
+    "items": [
+      { "label": "Africa", "value": "af" },
+      { "label": "North America", "value": "na" },
+      { "label": "South America", "value": "sa" },
+      { "label": "Europe", "value": "eu" },
+      { "label": "Asia", "value": "as" }
+      { "label": "Oceania", "value": "oc" }
+      { "label": "Antarctica", "value": "an" }
+    ]
+  }
+}
+----
+
+In this example, the field `value` may only have a single value (because the field `type` is not `array` or `set`),
+and the `value`, if set, must equal one of the option values of `af`, `na`, `sa`, `eu`, `as`, `oc`, or `an` as defined
+by the child Option `value` members.  Also, because this field does not define a `type` member, the field `type`
+defaults to `string` because the first Option's `value` type (in this case `af`) is a `string`.
+
+If the field `type` is `set` or `array`, then multiple values may be set for the field `value` in accordance with any
+other applicable constraints.
+
+If a field that allows a multiple values does not define an `itemtype` member, an Ion parser MUST default the field
+`itemtype` to be equal to the type discovered by inspecting the first Option's `value` member value.
+
+For example, consider another form field that allows multiple values:
+
+.Example Form Field with multiple Options:
+[source,json]
+----
+{ "name": "visitedContinents", "type": "set", "minitems": 1, "maxitems": 7, "options": {
+    "items": [
+      { "label": "Africa", "value": "af" },
+      { "label": "North America", "value": "na" },
+      { "label": "South America", "value": "sa" },
+      { "label": "Europe", "value": "eu" },
+      { "label": "Asia", "value": "as" }
+      { "label": "Oceania", "value": "oc" }
+      { "label": "Antarctica", "value": "an" }
+    ]
+  }
+}
+----
+
+In this example, form field `value` may only be a `set` that contains a minimum of one value and a maximum of seven
+values.  Because this field does not define an `itemtype` member, the `itemtype` defaults to `string` because the first
+Option's `value` type (in this case `af`) is a `string`.
+
 ==== `pattern`
 
 The `pattern` member is a string that defines a regular expression that the field `value` must be validated against.
@@ -768,15 +834,6 @@ A non-null field `value` must be a JSON string that conforms to the `full-date` 
 
 ==== `datetime`
 
-A non-null field `value` must be a JSON string that conforms to the following https://tools.ietf.org/html/rfc5234[ABNF] grammar:
-
-    time-separator = "T" / "t"
-    datetime       = full-date time-separator partial-time
-
-where `full-date` and `partial-time` are defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
-
-==== `datetimetz`
-
 A non-null field `value` must be a JSON string that conforms to the `date-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
 
 ==== `decimal`
@@ -795,6 +852,10 @@ A non-null field `value` must be a JSON string that is also a valid email addres
 
 A non-null field `value` must be a JSON number that does not contain a decimal point (aka the Period `.` character, ASCII code 46).
 
+==== `iri`
+
+A non-null field `value` must be a JSON string that is a validly-formed Internationalized Resource Identifier (IRI) as defined by https://tools.ietf.org/html/rfc3987[RFC 3987].
+
 ==== `number`
 
 A non-null `value` must be a JSON number.
@@ -805,6 +866,22 @@ A non-null `value` must be a JSON object.
 
 If the field has a `form` member, the field `value` JSON object MUST be the JSON representation that would result if
 submitting that form.
+
+==== `pdatetime`
+
+A non-null field `value` must be a JSON string that conforms to the following https://tools.ietf.org/html/rfc5234[ABNF] grammar:
+
+    datetime = full-date "T" partial-time
+
+where `full-date` and `partial-time` are defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
+
+To avoid potential logic inconsistencies across heterogeneous systems, it is generally RECOMMENDED to use `datetime` instead of `pdatetime` when possible.
+
+==== `ptime`
+
+A non-null field `value` must be a JSON string that conforms to the `partial-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
+
+To avoid potential logic inconsistencies across heterogeneous systems, it is generally RECOMMENDED to use `time` instead of `ptime` when possible.
 
 ==== `set`
 
@@ -823,11 +900,42 @@ A non-null field `value` must be a JSON string.
 
 ==== `time`
 
-A non-null field `value` must be a JSON string that conforms to the `partial-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
-
-==== `timetz`
-
 A non-null field `value` must be a JSON string that conforms to the `full-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
+
+==== `url`
+
+A non-null field `value` must be a JSON string that is a validly-formed Uniform Resource Locator (URL) as defined by https://tools.ietf.org/html/rfc3986#section-1.1.3[RFC 3986 Section 1.1.3].
+
+[[form-field-option-members]]
+=== Form Field Option Members
+
+An Form Field Option has one or more of the following members.
+
+==== `enabled`
+
+The `enabled` member indicates whether or not the Option `value` may be added to the containing Form Field's `value`.
+
+The `enabled` member is a boolean; it must equal either `true` or `false`. `null` or any other JSON value MUST NOT be specified.
+
+A `false` value indicates that the Option `value` MUST NOT be added to the containing Form Field's `value`.
+
+If the `enabled` member is not present, or if it present and equal to `true`, the Option `value` may be added to the containing Form Field's `value`.
+
+If an Option should be considered enabled, it is RECOMMENDED to omit the `enabled` member entirely to reduce verbosity.
+
+Use of this member is OPTIONAL.
+
+==== `label`
+
+The `label` member is a string description of the Option that may be used to enhance usability.
+
+Use of this member is OPTIONAL.
+
+==== `value`
+
+The `value` member reflects the value assigned to the Option.
+
+Use of this member is REQUIRED.
 
 == Registered Metadata Member Names
 
