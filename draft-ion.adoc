@@ -515,14 +515,19 @@ Use of this member is OPTIONAL.
 
 ==== `form`
 
-The `form` member value is a nested and non-linked Form object that indicates the structure a non-null field `value`
-object. This allows Ion content authors to define complex data/content graphs that may be submitted to a single linked
-resource location.
+The `form` member value is either a Form object or a Link to a Form object that reflects the required object structure
+of the Field `value`. This allows Ion content authors to define complex data/content graphs that may be
+submitted to a single linked resource location.
 
 Ion parsers MUST ignore a discovered `form` member if the field `type` member does not equal `object`.
 
-Ion parsers MUST ignore any discovered `meta` `href` value on nested Form objects; only the top Form `meta` `href` in
-a form hierarchy should be used when submitting a content graph to a linked resource location.
+If the `form` member is a Link or a Linked Form, Ion parsers MUST NOT submit data to the `form` value's linked
+`href` location.  The `form` value's `meta` `href` location may only be used to read the associated form to
+determine the structure of the associated value object.
+
+Where a Form contains nested Forms in this manner, the resulting collected data will form an object graph.  This
+data/graph may only be submitted to the top-most Form's linked resource location; Ion parsers MUST NOT submit data to
+any nested/child Form linked resource location.
 
 ==== `itemtype`
 
