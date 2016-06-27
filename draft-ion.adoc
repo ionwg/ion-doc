@@ -895,7 +895,7 @@ To avoid potential logic inconsistencies across heterogeneous systems, it is REC
 The field `value` must be a JSON array and the array MUST NOT contain any element that is equal to any other
 element within the same array, where element equality is defined in Appendix A.
 
-If a `set` field also contains `min`, `minlength`, `max, `maxlength` or `pattern` members, those
+If a `set` field also contains `min`, `minlength`, `max`, `maxlength` or `pattern` members, those
 members' validation rules apply to each item in the set array, not the set array itself.
 
 If a `set` field also declares an `options` member, the set array MUST NOT contain any value that does not appear in a
