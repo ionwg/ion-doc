@@ -1,5 +1,5 @@
 = The Ion Hypermedia Type
-Les Hazlewood <les@hazlewood.com>
+The Ion Working Group
 :revnumber: draft-ionwg-ion-01
 :revdate: {docdatetime}
 :source-highlighter: pygments
