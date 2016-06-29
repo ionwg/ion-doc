@@ -861,6 +861,10 @@ A non-null field `value` must be a JSON number that does not contain a decimal p
 
 A non-null field `value` must be a JSON string that is a validly-formed Internationalized Resource Identifier (IRI) as defined by https://tools.ietf.org/html/rfc3987[RFC 3987].
 
+==== `link`
+
+A non-null `value` must be an Ion Link.
+
 ==== `number`
 
 A non-null `value` must be a JSON number.
