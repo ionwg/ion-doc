@@ -46,7 +46,7 @@ This Internet-Draft will expire on 31 July 2016.
 
 .Copyright Notice
 
-Copyright (c) Les Hazlewood 2013-2016 and persons identified as document authors.  All rights reserved.
+Copyright (c) 2013-2016 Ion Working Group and persons identified as document authors.  All rights reserved.
 
 :sectnums:
 
