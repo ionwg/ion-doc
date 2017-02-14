@@ -54,7 +54,7 @@ Copyright (c) 2013-2016 Ion Working Group and persons identified as document aut
 
 HTTP is commonly used to transfer data in many different data formats. With the advent of the {uri-rest}[REST]
 architectural style and the success of the JavaScript programming language, HTTP-enabled applications regularly
-support {uri-json}[JSON] as a preferred data format for data exchange.
+support {uri-json}[JSON] as a preferred format for data exchange.
 
 However, this poses a challenge for machine data exchange at web scale across heterogeneous domains and organizations;
 JSON's simple grammar can support virtually any data model - additional context is required for machine clients and
@@ -80,6 +80,9 @@ A JSON object where all members represent Metadata.
 
 .Root Object
 The single JSON object at the root of an Ion content structure.
+
+.Value Object
+A JSON object with a member named `value`.
 
 .Collection Object
 A JSON object with an array member named `items`.
@@ -232,7 +235,7 @@ resource to Joe's employer might be represented as follows:
 ==== Example Form
 
 An Ion Form ensures that resource transitions that support data submissions can be discovered automatically
-(colloquially referred to as https://en.wikipedia.org/wiki/HATEOAS[HATEOS]).
+(colloquially referred to as https://en.wikipedia.org/wiki/HATEOAS[HATEOAS]).
 
 .Example Ion Form
 [source,json]
@@ -322,6 +325,43 @@ specified in {uri-ecmaScript-5-1-15-12-2}[Section 15.12.2 (The JSON Object - par
 A _Meta Object_ MAY contain members that are not defined in the Ion Metadata Member Registry.  Any member not
 understood by an Ion parser SHOULD be ignored.
 
+[[valueobjects]]
+== Value Objects
+
+A _Value Object_ is a JSON object that contains a `value` member.
+
+A _Value Object_ is used to represent a primary JSON value but also allows for other peer members to provide additional
+contextual information regarding the `value` member.
+
+An Ion parser MUST identify a JSON object as a _Value Object_ if the JSON object contains a JSON member with a name
+equal to the case-sensitive octet sequence `value`.
+
+A _Value Object_ MAY have additional members other than the `value` member.
+
+Consider the following non-normative example of an object with a `greeting` member:
+
+.Example object with a greeting:
+[source,json]
+----
+{
+  "greeting": "Hola"
+}
+----
+
+In this example, the `greeting` member value is a Spanish language word.  A _Value Object_ might be used instead to
+represent additional contextual information that might be relevant to user agents.  For example:
+
+.Example object with a greeting value object:
+[source,json]
+----
+{
+  "greeting" : { "lang": "es", "value":  "Hola" }
+}
+----
+
+In this example, the `greeting` member transitively reflects reflects a value of `Hola` through the presence of
+a _Value Object_.
+
 [[links]]
 == Links
 
@@ -345,14 +385,14 @@ A non-normative example of a minimal Ion link:
 { "meta": { "href": "https://example.io/corporations/acme" } }
 ----
 
-A non-normative example of an Ion Link that also has other members:
+A non-normative example of an Ion Link that is also a Value Object:
 
-.Example Ion Object that is also an Ion Link:
+.Example Ion Link that is also a Value Object:
 [source,json]
 ----
 {
   "meta": { "href": "https://example.io/corporations/acme" },
-  "name": "Acme, Inc."
+  "value": "Acme, Inc."
 }
 ----
 
@@ -448,7 +488,7 @@ If an Ion Form is also an Ion Link, collected data associated with the form's fi
 linked resource location.
 
 An Ion Form _may not_ be an Ion Link if and only if that form is nested inside another form or form field.  Nesting forms
-allows for creation of complex object graphs that may be submitted to a single linked resource locations.
+allows for creation of complex object graphs that may be submitted to the top-most form's linked resource location.
 
 An Ion Form MUST also be an Ion Link if it is not nested within another form.
 
@@ -496,6 +536,13 @@ within the same array.
 === Form Field Members
 
 An Ion Form Field has one or more of the following members.
+
+==== `desc`
+
+The `description` member is a string description of the field that may be used to enhance usability, for example, as
+a tool tip.
+
+Use of this member is OPTIONAL.
 
 ==== `enabled`
 
@@ -545,7 +592,7 @@ Use of this member is OPTIONAL.
 
 ==== `label`
 
-The `label` member is a string description of the field that may be used to enhance usability.
+The `label` member is a human-readable string that may be used to enhance usability.
 
 Use of this member is OPTIONAL.
 
@@ -729,9 +776,12 @@ Option's `value` type (in this case `af`) is a `string`.
 
 ==== `pattern`
 
-The `pattern` member is a string that defines a regular expression that the field `value` must be validated against.
+The `pattern` member is a JSON string that defines a regular expression used to validate the field `value`.
 
-The `pattern` member MUST NOT be specified on fields with non-string or non-date value types.
+If specified, the `pattern` member string value must conform to the `Pattern` grammar defined in
+https://www.ecma-international.org/ecma-262/5.1/#sec-15.10.1[Ecma-262 Edition 5.1 Section 15.10.1].
+
+The `pattern` member MUST NOT be specified on fields with non-string or non-date/non-time value types.
 
 Use of this member is OPTIONAL.
 
@@ -938,7 +988,7 @@ Use of this member is OPTIONAL.
 
 ==== `label`
 
-The `label` member is a string description of the Option that may be used to enhance usability.
+The `label` member is a human-readable string that may be used to enhance usability.
 
 Use of this member is OPTIONAL.
 
