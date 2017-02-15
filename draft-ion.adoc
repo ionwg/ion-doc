@@ -75,9 +75,6 @@ A JSON name/value pair as defined in https://tools.ietf.org/html/rfc7159#section
 .Metadata
 A set of data that provides information about other data.
 
-.Meta Object
-A JSON object where all members represent Metadata.
-
 .Root Object
 The single JSON object at the root of an Ion content structure.
 
@@ -85,32 +82,30 @@ The single JSON object at the root of an Ion content structure.
 A JSON object with a member named `value`.
 
 .Collection Object
-A JSON object with an array member named `items`.
-
-.Ion Object
-A JSON object with a _Meta Object_ member named `meta`.
-
-.Ion Collection
-An Ion Object that is also a _Collection Object_.
+A _Value Object_ where the `value` member is a JSON array.  If a JSON value is an element in a _Collection Object_'s
+`value` array, it is said that the Collection Object _contains_ that value.
 
 .Resource
 The referent of an {uri-IRIs}[International Resource Identifier].
 
+.Collection Resource
+A _Resource_ that is also a _Collection Object_.
+
 .Link
-An Ion Object where its `meta` member contains an {uri-IRIs}[IRI] member named `href`.  This is the Ion representation
-of a {uri-links}[Web Link] that enables linking from one resource to another.
+A JSON object with an {uri-IRIs}[IRI] member named `href`.  This is Ion's JSON serialization of a {uri-links}[Web Link]
+that enables linking from one resource to another.
 
 .Form Field
-A JSON object of members that describe data that may be collected and submitted to a linked resource location.
+A JSON object with members that describe a named value that may be collected and submitted to a linked resource location.
 
 .Form Field Option
-A Collection Object named `options` that is a member of a Form Field.
+A _Value Object_ with a `value` that may be applied to the containing Form Field's `value`.
 
 .Form
-An Collection Object where the `items` array contains Form Fields.
+An _Collection Object_ that contains Form Fields.
 
 .Linked Form
-A Form that is also a Link.  Form data submitted will be sent to the form's `meta` `href` resource location.
+A _Form_ that is also a _Link_.  Form data submitted will be sent to the form's `href` resource location.
 
 === Media Type Name and Version
 
@@ -131,9 +126,9 @@ All following examples are non-normative.
 
 ==== Example Objects
 
-A JSON object without metadata is parsed as a standard JSON object:
+Most JSON objects are parsed as as expected:
 
-.Example JSON Object Without Metadata
+.Example JSON Object
 [source,json]
 ----
 {
@@ -143,82 +138,31 @@ A JSON object without metadata is parsed as a standard JSON object:
 }
 ----
 
-An _Ion Object_ is a JSON object with a _Meta Object_ member named `meta`:
+A _Value Object_ is a JSON object with a `value` member:
 
-.Example Ion Object
+.Example Value Object
 [source,json]
 ----
 {
-  "meta": { "href": "https://example.io/users/1" },
-  "firstName": "Bob",
-  "lastName": "Smith",
-  "birthDate": "1980-01-23"
+  "value": "Hello"
 }
 ----
 
-==== Example Collections
+A _Value Object_ exists to represent a primary JSON value, but it also might have other members that are contextually
+relevant and support the value.  For example, one might add a `lang` member to indicate a spoken language:
 
-A _Collection Object_ is a JSON object that has an array member named `items`:
-
-.Example Empty Collection Object:
+.Example Value Object With Supporting Members
 [source,json]
 ----
 {
-  "items": []
-}
-----
-
-An _Ion Collection_ is both an _Ion Object_ and a _Collection Object_ - it has both `items` and `meta` members.  The
-`meta` member can reflect metadata about the `items` array or elements within the array, something the JSON grammar
-cannot do directly.
-
-An example empty _Ion Collection_:
-
-.Example Empty Ion Collection:
-[source,json]
-----
-{
-  "meta": { "href": "https://example.io/users", "rel": ["collection"] },
-  "items": []
-}
-----
-
-Ion Collections can have other members to build up rich functionality.  For example, an Ion Collection that can
-support discoverable pagination:
-
-.Example Paginated Ion Collection:
-[source,javascript]
-----
-{
-  "meta": { "href": "https://example.io/users", "rel": ["collection"] },
-  "offset": 0,
-  "limit": 25,
-  "size": 218,
-  "first": { "meta": { "href": "https://example.io/users", "rel": ["collection"] } },
-  "previous": null,
-  "next": { "meta": { "href": "https://example.io/users?offset=25", "rel": ["collection"] } },
-  "last": { "meta": { "href": "https://example.io/users?offset=200", "rel": ["collection"] } },
-  "items": [
-    {
-      "meta": { "href": "https://example.io/users/1" },
-      "firstName": "Bob",
-      "lastName": "Smith",
-      "birthDate": "1977-04-18"
-    },
-    //... items 2-24 omitted for brevity
-    {
-      "meta": { "href": "https://example.io/users/25" },
-      "firstName": "Jane",
-      "lastName": "Doe",
-      "birthDate": "1980-01-23"
-    }
-  ]
+  "value": "Hello"
+  "lang": "en"
 }
 ----
 
 ==== Example Links
 
-An _Ion Link_ is an Ion Object representation of a {uri-rfc5988}[web link] to another resource.
+An Ion _Link_ is a JSON serialization of a {uri-rfc5988}[web link] to another resource.
 
 For example, assume that someone named "Joe" is an employee of the "Acme" corporation.  A link within the "Joe"
 resource to Joe's employer might be represented as follows:
@@ -228,32 +172,117 @@ resource to Joe's employer might be represented as follows:
 ----
 {
   "name": "Joe",
-  "employer": { "meta": { "href": "https://example.io/corporations/acme" } }
+  "employer": { "href": "https://example.io/corporations/acme" }
+}
+----
+
+==== Example Collections
+
+A _Collection Object_ is a _Value Object_ where the `value` member is a JSON array:
+
+.Example Empty Collection Object:
+[source,json]
+----
+{
+  "value": []
+}
+----
+
+What's the point of this?  Why not just use a JSON array directly?
+
+The reason is that other members within the Collection Object may provide additional contextual information about
+the `value` array itself or the elements in the `value` array, something not possible with standard JSON grammar.
+
+For example, a _Collection Object_ could have an `itemtype` property to represent an application-defined data type that
+should be associated with each element in the `value` array instead of repeating this information in every array
+element:
+
+.Example Collection Object With Metadata:
+[source,json]
+----
+{
+  "itemtype": "person"
+  "value": [
+      {
+        "firstName": "Bob",
+        "lastName": "Smith",
+      },
+      {
+        "firstName": "Jane",
+        "lastName": "Doe",
+      }
+    ]
+}
+----
+
+In addition to this metadata, Collection Objects can have other members to build up rich functionality.  For example,
+one can add link members to represent a Collection Object as an IRI-accessible _Collection Resource_:
+
+.Example Empty Collection Resource:
+[source,json]
+----
+{
+  "self": { "href": "https://example.io/users", "rel": ["collection"] },
+  "value": []
+}
+----
+
+Other members can be added to build up rich functionality.  For example, a Collection Resource with
+discoverable pagination:
+
+.Example Paginated Collection Resource:
+[source,javascript]
+----
+{
+  "self": { "href": "https://example.io/users", "rel": ["collection"] },
+  "offset": 0,
+  "limit": 25,
+  "size": 218,
+  "first": { "href": "https://example.io/users", "rel": ["collection"] },
+  "previous": null,
+  "next": { "href": "https://example.io/users?offset=25", "rel": ["collection"] },
+  "last": { "href": "https://example.io/users?offset=200", "rel": ["collection"] },
+  "value": [
+    {
+      "self": { "href": "https://example.io/users/1" },
+      "firstName": "Bob",
+      "lastName": "Smith",
+      "birthDate": "1977-04-18"
+    },
+    //... items 2-24 omitted for brevity
+    {
+      "self": { "href": "https://example.io/users/25" },
+      "firstName": "Jane",
+      "lastName": "Doe",
+      "birthDate": "1980-01-23"
+    }
+  ]
 }
 ----
 
 ==== Example Form
 
-An Ion Form ensures that resource transitions that support data submissions can be discovered automatically
-(colloquially referred to as https://en.wikipedia.org/wiki/HATEOAS[HATEOAS]).
+An Ion Form is a _Collection Object_ that contains _Form Fields_.  Ion Forms ensure that resource transitions (links)
+that support data submissions can be discovered automatically (colloquially referred to as
+https://en.wikipedia.org/wiki/HATEOAS[HATEOAS]).
 
 .Example Ion Form
 [source,json]
 ----
 {
-  "meta": { "href": "https://example.io/users", "rel":["create-form"], "method": "POST"},
-  "items": [
+  "href": "https://example.io/users", "rel":["create-form"], "method": "POST",
+  "value": [
     { "name": "username" },
     { "name": "password", "secret": true },
     { "name": "favoriteColor", "label": "Favorite Color", "options": {
-        "items": [
+        "value": [
           { "label": "Red", "value": "red" },
           { "label": "Blue", "value": "blue" }
         ]
       }
     },
     { "name": "visitedContinents", "type": "set", "minitems": 1, "maxitems": 7, "options": {
-        "items": [
+        "value": [
           { "label": "Africa", "value": "af" },
           { "label": "North America", "value": "na" },
           { "label": "South America", "value": "sa" },
@@ -265,7 +294,7 @@ An Ion Form ensures that resource transitions that support data submissions can 
       }
     },
     { "name": "favoriteContinent", "options": {
-        "items": [
+        "value": [
           { "label": "Africa", "value": "af" },
           { "label": "North America", "value": "na" },
           { "label": "South America", "value": "sa" },
@@ -355,7 +384,7 @@ represent additional contextual information that might be relevant to user agent
 [source,json]
 ----
 {
-  "greeting" : { "lang": "es", "value":  "Hola" }
+  "greeting" : { "value":  "Hola", "lang": "es" }
 }
 ----
 
@@ -365,24 +394,22 @@ a _Value Object_.
 [[links]]
 == Links
 
-An Ion Link is an Ion Object where the `meta` member contains an {uri-IRIs}[IRI] member named `href`. An Ion Link
-therefore is a JSON serialization of a {uri-rfc5988}[web link] to another resource.
+An Ion Link is a a JSON object that contains an {uri-IRIs}[IRI] member named `href`. An Ion Link is a JSON
+serialization of a {uri-rfc5988}[web link] to another resource.
 
-An Ion parser MUST identify a JSON object as an _Ion Link_ if:
+An Ion parser MUST identify a JSON object as an _Ion Link_ if the object contains an {uri-IRIs}[IRI] member with a
+name equal to the case-sensitive octet sequence `href`.
 
-1. The member is a _Meta Object_ as defined in Section 3 and
-2. The Meta Object contains an {uri-IRIs}[IRI] member with a name equal to the case-sensitive octet sequence `href`.
+If the `href` member value is `null`, not a string, an empty string, or a whitespace-only (blank) string, an Ion parser MUST NOT identify the object as an _Ion Link_.
 
-If the Meta Object `href` value is `null`, not a string, an empty string, or a whitespace-only (blank) string, an Ion parser MUST NOT identify the object as an _Ion Link_.
-
-An _Ion Link_ MAY have additional members other than the `meta` member.
+An _Ion Link_ MAY have additional members other than the `href` member.
 
 A non-normative example of a minimal Ion link:
 
 .Example simplest Ion link:
 [source,json]
 ----
-{ "meta": { "href": "https://example.io/corporations/acme" } }
+{ "href": "https://example.io/corporations/acme" }
 ----
 
 A non-normative example of an Ion Link that is also a Value Object:
@@ -391,22 +418,24 @@ A non-normative example of an Ion Link that is also a Value Object:
 [source,json]
 ----
 {
-  "meta": { "href": "https://example.io/corporations/acme" },
+  "href": "https://example.io/corporations/acme",
   "value": "Acme, Inc."
 }
 ----
 
 === Link Relation Types
 
-All Ion links have one or more {uri-link-relation-types}[Link Relation Types].  A link's total set of link relation types is the set union of the link's implicit link relation type and the link's explicit link relation types.
+All Ion links have one or more {uri-link-relation-types}[Link Relation Types].  A link's total set of link relation
+types is the set union of the link's implicit link relation type and the link's explicit link relation types.
 
 ==== Implicit Link Relation Type
 
-All Ion links have exactly one implicit link relation type.  The implicit link relation type can be one of three possible values depending on where the link is located in the Ion content:
+All Ion links have exactly one implicit link relation type.  The implicit link relation type can be one of three
+possible values depending on where the link is located in the Ion content:
 
 1. Root Object
 2. Named Link
-3. Ion Collection `items` array element
+3. Collection Object `value` array element
 
 ===== Root Object Implicit Link Relation Type
 
@@ -417,7 +446,7 @@ A non-normative example of a Root Object that is also an Ion Link:
 [source,json]
 ----
 {
-  "meta": { "href": "https://example.io/users/1" },
+  "href": "https://example.io/users/1",
   "name": "Joe"
 }
 ----
@@ -431,7 +460,7 @@ A non-normative example:
 [source,json]
 ----
 {
-  "employer": { "meta": { "href": "https://example.io/corporations/acme" } }
+  "employer": { "href": "https://example.io/corporations/acme" }
 }
 ----
 
@@ -439,22 +468,24 @@ The above example shows an Ion Link member named `employer`.  The octet sequence
 
 ===== Collection Item Implicit Link Relation Type
 
-Any Ion Link in a _Collection Object_'s `items` array is implicitly assigned the {uri-linkRelType-item}[`item`] link relation type.
+Any Ion Link in a _Collection Object_'s `value` array is implicitly assigned the {uri-linkRelType-item}[`item`] link
+relation type.
 
 A non-normative example:
 
 [source,json]
 ----
 {
-  "meta": { "href": "https://example.io/users", "rel": ["collection"] },
-  "items": [
-    { "meta": { "href": "https://example.io/users/1" } },
-    { "meta": { "href": "https://example.io/users/2" } }
+  "self": { "href": "https://example.io/users", "rel": ["collection"] },
+  "value": [
+    { "href": "https://example.io/users/1" },
+    { "href": "https://example.io/users/2" }
   ]
 }
 ----
 
-The above example has 2 Links in its `items` array.  Each of these 2 links are implicitly assigned the {uri-linkRelType-item}[`item`] link relation type.
+The above example has 2 Links in its `value` array.  Each of these 2 links are implicitly assigned the
+{uri-linkRelType-item}[`item`] link relation type.
 
 ==== Explicit Link Relation Types
 
@@ -465,7 +496,7 @@ A non-normative example of a link with an explicitly defined link relation type:
 .Example Ion Link with explicit link relation type:
 [source,json]
 ----
-{ "meta": { "href": "https://cdn.example.com/example.ico", "rel": ["icon"] } }
+{ "href": "https://cdn.example.com/example.ico", "rel": ["icon"] }
 ----
 
 The above example has an explicit link relation type of http://www.w3.org/TR/html5/links.html#rel-icon[`icon`].
@@ -502,9 +533,9 @@ Ion parsers MUST identify any JSON object as an Ion Form if the object matches t
      an internal `rel` member that contains one of the octet sequences `form`, `edit-form`, `create-form` or
      `query-form`, OR:
   b. The JSON object is a member named `form` inside an Ion Form Field.
-2. The JSON object has an `items` array member with a value that is not `null` or empty.
-3. The JSON object's `items` array contains one or more Ion Form Field objects.
-4. The JSON object's `items` array does not contain elements that are not Ion Form Field objects.
+2. The JSON object has a `value` array member with a value that is not `null` or empty.
+3. The JSON object's `value` array contains one or more Ion Form Field objects.
+4. The JSON object's `value` array does not contain elements that are not Ion Form Field objects.
 
 Ion parsers MUST NOT identify a JSON object as an Ion Form if the object does not match the above conditions.
 
@@ -513,8 +544,8 @@ A non-normative example:
 [source,json]
 ----
 {
-  "meta": { "href": "https://example.io/loginAttempts", "rel":["form"], "method": "POST"},
-  "items": [
+  "href": "https://example.io/loginAttempts", "rel":["form"], "method": "POST",
+  "value": [
     { "name": "username" },
     { "name": "password", "secret": true }
   ]
@@ -524,12 +555,12 @@ A non-normative example:
 [[form-fields]]
 === Form Fields
 
-An Ion Form Field is a JSON object in an Ion Form's `items` array that contains one or more
+An Ion Form Field is a JSON object in an Ion Form's `value` array that contains one or more
 <<form-field-members, Form Field Members>>.
 
 An Ion Form Field MUST have a string member named `name`.
 
-Each Ion Form Field within an Ion Form's `items` array MUST have a unique `name` value compared to any other Form Field
+Each Ion Form Field within an Ion Form's `value` array MUST have a unique `name` value compared to any other Form Field
 within the same array.
 
 [[form-field-members]]
@@ -706,13 +737,13 @@ The `name` value MUST NOT be `null`.
 
 The `name` value MUST NOT contain only whitespace.
 
-The `name` value MUST be unique compared to any other Form Field `name` value in the containing Form's `items` array.
+The `name` value MUST be unique compared to any other Form Field `name` value in the containing Form's `value` array.
 
 Use of this member is REQUIRED.
 
 ==== `options`
 
-The `options` member is a Collection Object where the `items` array contains _Form Field Option_ objects.  A Form Field
+The `options` member is a Collection Object where the `value` array contains _Form Field Option_ objects.  A Form Field
 Option object contains one or more members defined in <<form-field-option-members,Form Field Option Members>>.
 
 When an `options` member is present, the form field `value` MUST be restricted to contain only values found within
@@ -727,7 +758,7 @@ For example, consider the following form field:
 [source,json]
 ----
 { "name": "favoriteContinent", "options": {
-    "items": [
+    "value": [
       { "label": "Africa", "value": "af" },
       { "label": "North America", "value": "na" },
       { "label": "South America", "value": "sa" },
@@ -757,7 +788,7 @@ For example, consider another form field that allows multiple values:
 [source,json]
 ----
 { "name": "visitedContinents", "type": "set", "minitems": 1, "maxitems": 7, "options": {
-    "items": [
+    "value": [
       { "label": "Africa", "value": "af" },
       { "label": "North America", "value": "na" },
       { "label": "South America", "value": "sa" },
@@ -1135,7 +1166,7 @@ Two JSON values are equal if and only if both are:
 - boolean and have the same boolean value, or
 - strings and have the same octet sequence, or
 - numbers and have the same mathematical value, or
-- arrays and have the same number of items, and items at the same index are equal according to this definition, or
+- arrays and have the same number of elements, and elements at the same index are equal according to this definition, or
 - objects and have the same property names, and values for the same property name are equal according to this definition.
 
 === Acknowledgements
