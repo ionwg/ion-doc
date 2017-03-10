@@ -22,4 +22,4 @@ set -e # exit with nonzero exit code if anything fails
 # build time in UTC (ISO 8601 format):
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-asciidoctor --safe -a revdate="${NOW}" -D build draft-ion.adoc
+asciidoctor --safe -a revdate="${NOW}" -D build index.adoc

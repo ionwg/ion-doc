@@ -43,6 +43,7 @@ if [ -n "${TRAVIS_PULL_REQUEST}" ] && (( "${TRAVIS_PULL_REQUEST}" > 0 )); then
 fi
 
 # copy over any other site assets that need to be in the site:
+cp draft-ion.html build
 cp google19ce5eacdd2e0f09.html build
 cp CNAME build
 
