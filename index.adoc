@@ -155,7 +155,7 @@ relevant and support the value.  For example, one might add a `lang` member to i
 [source,json]
 ----
 {
-  "value": "Hello"
+  "value": "Hello",
   "lang": "en"
 }
 ----
@@ -201,7 +201,7 @@ element:
 [source,json]
 ----
 {
-  "itemtype": "person"
+  "itemtype": "person",
   "value": [
       {
         "firstName": "Bob",
