@@ -1089,7 +1089,7 @@ If this form were to be submitted over HTTP, the HTTP request might look as foll
 [source,http]
 ----
 POST /users HTTP/1.1
-Host: example.com
+Host: example.io
 Accept: application/ion+json, application/json, */*
 User-Agent: Example/1.2.1
 Content-Type: application/json
