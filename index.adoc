@@ -72,9 +72,6 @@ These terms are defined by this specification:
 .Member
 A JSON name/value pair as defined in https://tools.ietf.org/html/rfc7159#section-4[RFC 7159].
 
-.Metadata
-A set of data that provides information about other data.
-
 .Root Object
 The single JSON object at the root of an Ion content structure.
 
@@ -102,7 +99,7 @@ A JSON object with members that describe a named value that may be collected and
 A _Value Object_ with a `value` that may be applied to the containing Form Field's `value`.
 
 .Form
-An _Collection Object_ that contains Form Fields.
+An _Collection Object_ where the `value` array member contains Form Fields.
 
 .Linked Form
 A _Form_ that is also a _Link_.  Form data submitted will be sent to the form's `href` resource location.
@@ -126,7 +123,7 @@ All following examples are non-normative.
 
 ==== Example Objects
 
-Most JSON objects are parsed as as expected:
+JSON objects are parsed as as expected:
 
 .Example JSON Object
 [source,json]
@@ -149,7 +146,7 @@ A _Value Object_ is a JSON object with a `value` member:
 ----
 
 A _Value Object_ exists to represent a primary JSON value, but it also might have other members that are contextually
-relevant and support the value.  For example, one might add a `lang` member to indicate a spoken language:
+relevant to the value.  For example, one might add a `lang` member to indicate a spoken language:
 
 .Example Value Object With Supporting Members
 [source,json]
@@ -162,7 +159,8 @@ relevant and support the value.  For example, one might add a `lang` member to i
 
 ==== Example Links
 
-An Ion _Link_ is a JSON serialization of a {uri-rfc5988}[web link] to another resource.
+An Ion _Link_ is a JSON object that contains an {uri-IRIs}[IRI] member named `href`.  An Ion Link is a JSON
+serialization of a {uri-rfc5988}[web link] to another resource.
 
 For example, assume that someone named "Joe" is an employee of the "Acme" corporation.  A link within the "Joe"
 resource to Joe's employer might be represented as follows:
@@ -191,13 +189,13 @@ A _Collection Object_ is a _Value Object_ where the `value` member is a JSON arr
 What's the point of this?  Why not just use a JSON array directly?
 
 The reason is that other members within the Collection Object may provide additional contextual information about
-the `value` array itself or the elements in the `value` array, something not possible with standard JSON grammar.
+the `value` array itself or the elements in the `value` array, something not possible with a direct array.
 
 For example, a _Collection Object_ could have an `itemtype` property to represent an application-defined data type that
 should be associated with each element in the `value` array instead of repeating this information in every array
 element:
 
-.Example Collection Object With Metadata:
+.Example Collection Object With element metadata:
 [source,json]
 ----
 {
@@ -215,7 +213,7 @@ element:
 }
 ----
 
-In addition to this metadata, Collection Objects can have other members to build up rich functionality.  For example,
+Collection Objects can have other members to build up rich functionality.  For example,
 one can add link members to represent a Collection Object as an IRI-accessible _Collection Resource_:
 
 .Example Empty Collection Resource:
@@ -227,7 +225,7 @@ one can add link members to represent a Collection Object as an IRI-accessible _
 }
 ----
 
-Other members can be added to build up rich functionality.  For example, a Collection Resource with
+More members can be added to build up rich functionality.  For example, a Collection Resource with
 discoverable pagination:
 
 .Example Paginated Collection Resource:
@@ -235,6 +233,7 @@ discoverable pagination:
 ----
 {
   "self": { "href": "https://example.io/users", "rel": ["collection"] },
+  "desc": "Showing 25 of 218 users.  Use the 'next' link for the next page.",
   "offset": 0,
   "limit": 25,
   "size": 218,
@@ -262,9 +261,9 @@ discoverable pagination:
 
 ==== Example Form
 
-An Ion Form is a _Collection Object_ that contains _Form Fields_.  Ion Forms ensure that resource transitions (links)
-that support data submissions can be discovered automatically (colloquially referred to as
-https://en.wikipedia.org/wiki/HATEOAS[HATEOAS]).
+An Ion Form is a _Collection Object_ where the `value` member array contains _Form Fields_.  Ion Forms ensure
+that resource transitions (links) that support data submissions can be discovered automatically (colloquially
+referred to as https://en.wikipedia.org/wiki/HATEOAS[HATEOAS]).
 
 .Example Ion Form
 [source,json]
@@ -326,46 +325,25 @@ Ion content MUST use UTF-8 encoding.  Other encodings MUST NOT be used.
 Ion content MUST have exactly one root JSON object, called the _Root Object_.  The Root Object MAY contain
 name/value pairs called 'members' and any level of nested JSON objects.
 
-[[metadata]]
-== Metadata
-
-A JSON object MAY contain a _Meta Object_ member named `meta`. If present, the _Meta Object_ represents data about its
-immediate parent JSON object. A `meta` member is OPTIONAL.
-
-An Ion parser MUST identify a member as a _Meta Object_ if and only if:
-
-1. The member name is equal to the case-sensitive octet sequence `meta` and
-2. The member value is a JSON Object that has one or more members.
-
-If a member name is equal to the case-sensitive octet sequence `meta` and the member value is NOT a JSON Object (i.e.
-it is an array, number, string or the octet sequence literals `null`, `false`, or `true` as defined by
-{uri-rfc-json-value}[RFC 7159, Section 3]), an Ion parser MUST NOT identify the member as a _Meta Object_.
-
-If a member name is equal to the case-sensitive octet sequence `meta` and the member value is an empty JSON Object with
-no members, an Ion parser MUST NOT identify the member as a _Meta Object_.
-
-If a member name is not equal to the case-sensitive octet sequence `meta`, an Ion parser MUST NOT identify a member as
-a _Meta Object_.
-
-The member names within an identified _Meta Object_ SHOULD be unique; Ion parsers MUST either reject _Meta Object_
-members with duplicate member names or use a JSON parser that returns only the lexically last duplicate member, as
-specified in {uri-ecmaScript-5-1-15-12-2}[Section 15.12.2 (The JSON Object - parse)] of {uri-ecmaScript-5-1}[ECMAScript 5.1].
-
-A _Meta Object_ MAY contain members that are not defined in the Ion Metadata Member Registry.  Any member not
-understood by an Ion parser SHOULD be ignored.
-
 [[valueobjects]]
 == Value Objects
 
 A _Value Object_ is a JSON object that contains a `value` member.
 
 A _Value Object_ is used to represent a primary JSON value but also allows for other peer members to provide additional
-contextual information regarding the `value` member.
+contextual information or metadata regarding the `value` member.
 
 An Ion parser MUST identify a JSON object as a _Value Object_ if the JSON object contains a JSON member with a name
 equal to the case-sensitive octet sequence `value`.
 
 A _Value Object_ MAY have additional members other than the `value` member.
+
+The member names within an identified _Value Object_ SHOULD be unique; Ion parsers MUST either reject _Value Object_
+members with duplicate member names or use a JSON parser that returns only the lexically last duplicate member, as
+specified in {uri-ecmaScript-5-1-15-12-2}[Section 15.12.2 (The JSON Object - parse)] of {uri-ecmaScript-5-1}[ECMAScript 5.1].
+
+A _Value Object_ MAY contain members that are not defined in the Ion Object Member Registry.  Any member not
+understood by an Ion parser SHOULD be ignored.
 
 Consider the following non-normative example of an object with a `greeting` member:
 
@@ -598,7 +576,7 @@ submitted to a single linked resource location.
 Ion parsers MUST ignore a discovered `form` member if the field `type` member does not equal `object`.
 
 If the `form` member is a Link or a Linked Form, Ion parsers MUST NOT submit data to the `form` value's linked
-`href` location.  The `form` value's `meta` `href` location may only be used to read the associated form to
+`href` location.  The form's `href` location may only be used to read the associated form to
 determine the structure of the associated value object.
 
 Where a Form contains nested Forms in this manner, the resulting collected data will form an object graph.  This
@@ -1030,9 +1008,9 @@ applied to the containing Form Field's `value` member.
 
 Use of this member is REQUIRED.
 
-== Registered Metadata Member Names
+== Registered Ion Object Member Names
 
-The following member names are registered in the IANA Ion Metadata member registry
+The following member names are registered in the IANA Ion Object Member Registry
 defined in [TBD].  None of the members defined below are intended to be mandatory
 in all cases, but rather, provide an initial set likely to be useful for common
 use cases.
@@ -1041,7 +1019,7 @@ use cases.
 
 The `href` (hypermedia reference) member identifies the target {uri-IRIs}[IRI] (Internationalized Resource Identifier) location of the resource. The `href` value is a case-sensitive {uri-IRIs}[IRI] value.
 
-If an `href` member exists, Ion parsers MUST identify the Meta Object as an Ion Link in addition to any other Ion Object identified by the Meta Object.
+If an `href` member exists, Ion parsers MUST identify the containing JSON Object as an Ion Link in addition to any other Ion Object identified.
 
 Note that in the common case, target IRIs and context IRIs will also be
 {uri-URIs}[URI]s (RFC 3986), because many protocols (such as HTTP) do not support
@@ -1084,10 +1062,10 @@ A _Link_ to a _Ion Collection_ SHOULD contain a `rel` member that has at least t
 
 == IANA Considerations
 
-=== Ion Metadata Member Registry
+=== Ion Object Member Registry
 
-This specification establishes the IANA Ion Metadata Member Registry for Ion
-Metadata Member Names.  The registry records the Member Name and a reference to
+This specification establishes the IANA Ion Object Member Registry for Ion
+Object Member Names.  The registry records the Member Name and a reference to
 the specification that defines it.  This specification registers the Member Names
 defined in Section 6.
 
@@ -1102,7 +1080,7 @@ published.
 
 Registration requests must filed as an
 https://github.com/ionwg/ion-doc/issues[ion-doc GitHub issue] for review and
-comment, with an appropriate subject (e.g., "Request to register metadata
+comment, with an appropriate subject (e.g., "Request to register value object
 member: example").
 
 Within the review period, the Designated Expert(s) will either approve or deny
@@ -1132,7 +1110,7 @@ Proposed registry description information:
 * Protocol Category: Ion
 * Registry Location: http://www.iana.org/assignments/ion
 * Webpage Title: Ion
-* Registry Name: Ion Metadata Members
+* Registry Name: Ion Object Members
 
 ==== Registration Template
 
@@ -1171,9 +1149,10 @@ Two JSON values are equal if and only if both are:
 
 === Acknowledgements
 
-The authors acknowledge that the design of the Ion data format was initially influenced by design concepts in https://tools.ietf.org/html/rfc4287[RFC 4287, The Atom Syndication Format], specifically the parallels between Atom's 'Entry' and 'Container' concepts and Ion's 'Ion Object' and 'Ion Collection' concepts, respectively.  The name 'Ion' is a playful nod to the Atom name, honoring this heritage.
-
-Ion's `meta` member concept was largely influenced by a discussion on JSON linking between Tim Berners-Lee and Mark Nottingham as described in Mark Nottingham's https://www.mnot.net/blog/2011/11/25/linking_in_json[Linking In JSON blog post].  The Ion `meta` concept codifies this idea and defines a registry for `meta` members useful for hypermedia interchange.
+The authors acknowledge that the design of the Ion data format was initially influenced by design concepts in
+https://tools.ietf.org/html/rfc4287[RFC 4287, The Atom Syndication Format], specifically the parallels between
+Atom's 'Entry' and 'Container' concepts and Ion's 'Ion Object' and 'Ion Collection' concepts, respectively.  The
+name 'Ion' is a playful nod to the Atom name, honoring this heritage.
 
 .Authors' Addresses
 
@@ -1181,6 +1160,6 @@ Ion's `meta` member concept was largely influenced by a discussion on JSON linki
 Les Hazlewood
 Email: les@hazlewood.com
 URI: http://leshazlewood.com
-Company: Stormpath
-Company URI: https://stormpath.com
+Company: Okta
+Company URI: https://okta.com
 ....
