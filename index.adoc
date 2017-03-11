@@ -1011,6 +1011,80 @@ applied to the containing Form Field's `value` member.
 
 Use of this member is REQUIRED.
 
+=== Form Submission
+
+When a form is submitted to a linked resource location, the form's data will be serialized to a JSON object named
+the _Form Submission Object_ according to the following rules:
+
+1.  Each form field with a `value` member will be added to the Form Submission Object as a member with the same name
+    having the same value.
+1.  If a form field has an `object` type and a `form` member, that form field's `value` member will first be serialized
+    to a JSON object according to these rules based on the field's `form` member.  The resulting object will be added
+    to the Form Submission Object as a member having the same name as the field name.
+1.  If the form does not contain an `accepts` member, the Form Submission Object SHOULD be identified as either
+    `application/json` or `application/ion+json` content type.
+
+
+Consider the following non-normative example form:
+
+.Example Form
+[source,json]
+----
+{
+  "href": "https://example.io/users", "rel":["create-form"], "method": "POST",
+  "value": [
+    { "name": "givenName", "value": "John" },
+    { "name": "surname", "value": "Smith" },
+    { "name": "username", "value": "jsmith" },
+    { "name": "password", "value": "correcthorsebatterystaple", "secret": true },
+    { "name": "employer", "label": "Employer", "type": "object", "form": {
+        "value": [
+          { "name": "name", "label": "Name", "value": "Acme, Inc." },
+          { "name": "foundingYear", "label": "Founding Year", "type": "integer", "value": 1900 },
+          { "name": "address", "label": "Employer Postal Address", "type": "object", "form": {
+              "value": [
+                { "name": "street1", "label": "Street 1", "value": "1234 Anywhere Street" },
+                { "name": "street2", "label": "Street 2", "value": "Suite 100" },
+                { "name": "city", "label": "City", "value": "Anytown" },
+                { "name": "state", "label": "State", "value": "NY" }
+                { "name": "zip", "label": "Zip", "value": "10001" }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+----
+
+The corresponding Form Submission Object for this form is:
+
+.Example Form
+[source,json]
+----
+{
+  "givenName": "John",
+  "surname": "Smith",
+  "username": "jsmith",
+  "password": "correcthorsebatterystaple",
+  "employer": {
+    "name": "Acme, Inc.",
+    "foundingYear": 1900,
+    "address": {
+      "street1": "1234 Anywhere Street",
+      "street2": "Suite 100",
+      "city": "Anytown",
+      "state": "NY",
+      "zip": "10001"
+    }
+  }
+}
+----
+
+According to the example form, the associated Form Submission Object may be transmitted to the linked resource location
+of `https://example.io/users` using an HTTP `POST` and a content-type of either `application/json` or `application/ion+json`.
+
 == Registered Ion Object Member Names
 
 The following member names are registered in the IANA Ion Object Member Registry
