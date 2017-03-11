@@ -1021,8 +1021,9 @@ the _Form Submission Object_ according to the following rules:
 1.  If a form field has an `object` type and a `form` member, that form field's `value` member will first be serialized
     to a JSON object according to these rules based on the field's `form` member.  The resulting object will be added
     to the Form Submission Object as a member having the same name as the field name.
-1.  If the form does not contain an `accepts` member, the Form Submission Object SHOULD be identified as either
-    `application/json` or `application/ion+json` content type.
+1.  If the form is transmitted to the `href` linked resource location via a communication protocol that supports
+    content type identification (such as HTTP), the content type MUST be identified as either
+    `application/json` or `application/ion+json`.
 
 
 Consider the following non-normative example form:
@@ -1060,7 +1061,7 @@ Consider the following non-normative example form:
 
 The corresponding Form Submission Object for this form is:
 
-.Example Form
+.Example Form Submission Object
 [source,json]
 ----
 {
@@ -1082,8 +1083,35 @@ The corresponding Form Submission Object for this form is:
 }
 ----
 
-According to the example form, the associated Form Submission Object may be transmitted to the linked resource location
-of `https://example.io/users` using an HTTP `POST` and a content-type of either `application/json` or `application/ion+json`.
+If this form were to be submitted over HTTP, the HTTP request might look as follows:
+
+.Example Form Submission HTTP Request
+[source,http]
+----
+POST /users HTTP/1.1
+Host: example.com
+Accept: application/ion+json, application/json, */*
+User-Agent: Example/1.2.1
+Content-Type: application/json
+
+{
+  "givenName": "John",
+  "surname": "Smith",
+  "username": "jsmith",
+  "password": "correcthorsebatterystaple",
+  "employer": {
+    "name": "Acme, Inc.",
+    "foundingYear": 1900,
+    "address": {
+      "street1": "1234 Anywhere Street",
+      "street2": "Suite 100",
+      "city": "Anytown",
+      "state": "NY",
+      "zip": "10001"
+    }
+  }
+}
+----
 
 == Registered Ion Object Member Names
 
