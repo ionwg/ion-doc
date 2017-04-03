@@ -849,7 +849,7 @@ Use of this member is OPTIONAL.
 
 The `value` member reflects the value assigned to the field.
 
-If the `type` member exists and does not equal `array` or `set, the `value` member value MUST conform to the data type
+If the `type` member exists and does not equal `array` or `set`, the `value` member value MUST conform to the data type
 specified by the `type` member value.
 
 If the `type` member exists and is equal to `array` or `set`, the `value` member value MUST be a JSON array.
