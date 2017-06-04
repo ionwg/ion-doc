@@ -191,15 +191,14 @@ What's the point of this?  Why not just use a JSON array directly?
 The reason is that other members within the Collection Object may provide additional contextual information about
 the `value` array itself or the elements in the `value` array, something not possible with a direct array.
 
-For example, a _Collection Object_ could have an `itemtype` property to represent an application-defined data type that
-should be associated with each element in the `value` array instead of repeating this information in every array
-element:
+For example, a _Collection Object_ could have an `eform` ("element form") member to represent the structural 'form'
+of each element in the `value` array instead of repeating this information in every array element:
 
 .Example Collection Object With element metadata:
 [source,json]
 ----
 {
-  "itemtype": "person",
+  "eform": { "href": "https://example.io/users/form" },
   "value": [
       {
         "firstName": "Bob",
@@ -280,7 +279,7 @@ referred to as https://en.wikipedia.org/wiki/HATEOAS[HATEOAS]).
         ]
       }
     },
-    { "name": "visitedContinents", "type": "set", "minitems": 1, "maxitems": 7, "options": {
+    { "name": "visitedContinents", "type": "set", "minsize": 1, "maxsize": 7, "options": {
         "value": [
           { "label": "Africa", "value": "af" },
           { "label": "North America", "value": "na" },
@@ -556,6 +555,32 @@ a tool tip.
 
 Use of this member is OPTIONAL.
 
+==== `eform`
+
+The `eform` member value is either a Form object or a Link to a Form object that reflects the required object structure
+of each element in the field's `value` array.  The name "eform" is short for "element form".
+
+If the field's `type` member is not equal to `array` or `set`, an Ion parser MUST ignore the `eform` member.
+
+If the `eform` member equals `null`, an Ion parser MUST ignore the `eform` member.
+
+If the `eform` member is not a valid Ion Form object, an Ion parser MUST ignore the `eform` member.
+
+If the `eform` member exists and is valid, and the `etype` member does not exist or equals `null`, an Ion parser MUST
+assign the field an `etype` member with a value of `object`.
+
+If the `etype` member does not equal `object`, an Ion parser MUST ignore the `eform` member.
+
+If the `eform` member is a Link or a Linked Form, Ion parsers MUST NOT submit data to the `eform` value's linked
+`href` location.  The eform's `href` location may only be used to read the associated form to
+determine the structure of the associated form object.
+
+If it has been determined that the `eform` member should be evaluated according to these rules, a validating user agent
+MUST ensure each element in the field's `value` array conforms to the specified `eform` form structure before form
+submission.
+
+Use of this member is OPTIONAL.
+
 ==== `enabled`
 
 The `enabled` member indicates whether or not the field `value` may be modified or submitted to a linked resource location.
@@ -567,6 +592,28 @@ A `false` value indicates that the field value MUST NOT be modified or submitted
 If the `enabled` member is not present, or if it present and equal to `true`, the field may be modified or submitted a linked resource location.
 
 If a field should be considered enabled, it is RECOMMENDED to omit the `enabled` member entirely to reduce verbosity.
+
+Use of this member is OPTIONAL.
+
+==== `etype`
+
+The `etype` member specifies the mandatory data type of each element in a form field's `value` array.  The name
+"etype" is short for "element type".
+
+If the field's `type` member is not equal to `array` or `set`, an Ion parser MUST ignore the `etype` member.
+
+If the `etype` member equals `null` and the `eform` member exists and is a valid Ion form, an Ion parser MUST
+assign the `etype` member a value of `object`.
+
+If the `etype` member does not equal one of the octet sequences <<Form Field `type` Values, Form Field `type` Values>>`,
+an Ion parser MUST ignore the `etype` member.
+
+If the `etype` member is ignored, an Ion parser MUST NOT perform type validation on any value in the field's `value`
+array before form submission.
+
+If it has been determined that the `etype` member should be evaluated, a validating user agent
+MUST ensure each element in the fields `values` array adheres to the specified `etype` (and any valid `eform`)
+before form submission.
 
 Use of this member is OPTIONAL.
 
@@ -585,22 +632,6 @@ determine the structure of the associated value object.
 Where a Form contains nested Forms in this manner, the resulting collected data will form an object graph.  This
 data/graph may only be submitted to the top-most Form's linked resource location; Ion parsers MUST NOT submit data to
 any nested/child Form linked resource location.
-
-==== `itemtype`
-
-The `itemtype` member specifies the mandatory data type that each value in a `value` array must adhere to. If present,
-the `itemtype` member value MUST equal one of the octet sequences defined in
-<<Form Field `type` Values, Form Field `type` Values>>.
-
-If the `type` member is not equal to `array` or `set`, an Ion parser MUST ignore the `itemtype` member.
-
-If the `type` member equals `array` or `set` and the `itemtype` member is present, an Ion parser MUST validate any
-value in the `value` array to ensure it adheres to the specified type.
-
-If the `type` member equals `array` or `set` and the `itemtype` member is not present or equals `null`, an Ion parser
-MUST NOT perform type validation on any value in the array before submitting the `value` to a linked resource location.
-
-Use of this member is OPTIONAL.
 
 ==== `label`
 
@@ -624,31 +655,31 @@ MUST ignore both the `min` member and the `max` member if the `max` value is les
 
 Use of this member is OPTIONAL.
 
-==== `maxitems`
-
-The `maxitems` member value is a non-negative integer that specifies the maximum number of field values that may be
-submitted when the field `type` value equals `array` or `set`.  Ion parsers MUST ignore any `maxitems` member that has
-a negative integer value.
-
-If the field `type` value does not equal `array` or `set`, an Ion parser MUST ignore any discovered `maxitems` member
-for that field.
-
-If a field has both `minitems` and `maxitems` members, the field's `maxitems` member value MUST be greater than or
-equal to the field's `minitems` member value.  Ion parsers MUST ignore both the `minitems` and `maxitems` members if the
-`maxitems` value is less than the `minitems` value.
-
-Use of this member is OPTIONAL.
-
 ==== `maxlength`
 
 The `maxlength` member is a non-negative integer that specifies the maximum number of characters the field `value`
 may contain.  Ion parsers MUST ignore any `maxlength` member that has a negative integer value.
 
-Ion parsers MUST ignore any discovered `minitems` member if the field `type` equals `object`, `array`, or `set`.
+Ion parsers MUST ignore any discovered `maxlength` member if the field `type` equals `object`, `array`, or `set`.
 
 If a field has both `minlength` and `maxlength` members, the field's `minlength` member value MUST be less than or
 equal to the field's `maxlength` member value.  Ion parsers MUST ignore both the `minlength` and `maxlength` members
 if the `maxlength` value is less than the `minlength` value.
+
+Use of this member is OPTIONAL.
+
+==== `maxsize`
+
+The `maxsize` member value is a non-negative integer that specifies the maximum number of field values that may be
+submitted when the field `type` value equals `array` or `set`.  Ion parsers MUST ignore any `maxsize` member that has
+a negative integer value.
+
+If the field `type` value does not equal `array` or `set`, an Ion parser MUST ignore any discovered `maxsize` member
+for that field.
+
+If a field has both `minsize` and `maxsize` members, the field's `maxsize` member value MUST be greater than or
+equal to the field's `minsize` member value.  Ion parsers MUST ignore both the `minsize` and `maxsize` members if the
+`maxsize` value is less than the `minsize` value.
 
 Use of this member is OPTIONAL.
 
@@ -668,21 +699,6 @@ MUST ignore both the `min` member and the `max` member if the `min` value is gre
 
 Use of this member is OPTIONAL.
 
-==== `minitems`
-
-The `minitems` member value is a non-negative integer that specifies the minimum number of field values that may be
-submitted when the field `type` value equals `array` or `set`.  Ion parsers MUST ignore any `minitems` member that has
-a negative integer value.
-
-If the field `type` value does not equal `array` or `set`, an Ion parser MUST ignore any discovered `minitems` member
-for that field.
-
-If a field has both `minitems` and `maxitems` members, the field's `minitems` member value MUST be less than or
-equal to the field's `maxitems` member value.  Ion parsers MUST ignore both the `minitems` and `maxitems` members if the
-`minitems` value is greater than the `maxitems` value.
-
-Use of this member is OPTIONAL.
-
 ==== `minlength`
 
 The `minlength` member is a non-negative integer that specifies the minimum number of characters the field `value`
@@ -693,6 +709,21 @@ Ion parsers MUST ignore any discovered `minlength` member if the field `type` eq
 If a field has both `minlength` and `maxlength` members, the field's `minlength` member value MUST be less than or
 equal to the field's `maxlength` member value.  Ion parsers MUST ignore both the `minlength` and `maxlength` members
 if the `minlength` value is greater than the `maxlength` value.
+
+Use of this member is OPTIONAL.
+
+==== `minsize`
+
+The `minsize` member value is a non-negative integer that specifies the minimum number of field values that may be
+submitted when the field `type` value equals `array` or `set`.  Ion parsers MUST ignore any `minsize` member that has
+a negative integer value.
+
+If the field `type` value does not equal `array` or `set`, an Ion parser MUST ignore any discovered `minsize` member
+for that field.
+
+If a field has both `minsize` and `maxsize` members, the field's `minsize` member value MUST be less than or
+equal to the field's `maxsize` member value.  Ion parsers MUST ignore both the `minsize` and `maxsize` members if the
+`minsize` value is greater than the `maxsize` value.
 
 Use of this member is OPTIONAL.
 
@@ -727,64 +758,14 @@ Use of this member is REQUIRED.
 The `options` member is a Collection Object where the `value` array contains _Form Field Option_ objects.  A Form Field
 Option object contains one or more members defined in <<form-field-option-members,Form Field Option Members>>.
 
-When an `options` member is present, the form field `value` MUST be restricted to contain only values found within
-Option `value` members.
+When an `options` member is present and the form field `type` does not equal `set` or `array`, any form field `value`
+specified MUST equal one of the values found within the Option array.
 
-If a field allows a single value and does not define a `type` member, an Ion parser MUST default the field `type` to be
-equal to the type discovered by inspecting the first Option's `value` member value.
+When an `options` member is present and the form field `type` equals `set` or `array`, the form field `value` MUST be a
+JSON array, and the array MUST NOT contain any value not found within the Option `value` array.
 
-For example, consider the following form field:
-
-.Example Form Field with Options (non-normative):
-[source,json]
-----
-{ "name": "favoriteContinent", "options": {
-    "value": [
-      { "label": "Africa", "value": "af" },
-      { "label": "North America", "value": "na" },
-      { "label": "South America", "value": "sa" },
-      { "label": "Europe", "value": "eu" },
-      { "label": "Asia", "value": "as" }
-      { "label": "Oceania", "value": "oc" }
-      { "label": "Antarctica", "value": "an" }
-    ]
-  }
-}
-----
-
-In this example, the field `value` may only have a single value (because the field `type` is not `array` or `set`),
-and the `value`, if set, must equal one of the option values of `af`, `na`, `sa`, `eu`, `as`, `oc`, or `an` as defined
-by the child Option `value` members.  Also, because this field does not define a `type` member, the field `type`
-defaults to `string` because the first Option's `value` type (in this case `af`) is a `string`.
-
-If the field `type` is `set` or `array`, then multiple values may be set for the field `value` in accordance with any
-other applicable constraints.
-
-If a field that allows multiple values does not define an `itemtype` member, an Ion parser MUST default the field
-`itemtype` to be equal to the type discovered by inspecting the first Option's `value` member value.
-
-For example, consider another form field that allows multiple values:
-
-.Example Form Field with multiple Options (non-normative):
-[source,json]
-----
-{ "name": "visitedContinents", "type": "set", "minitems": 1, "maxitems": 7, "options": {
-    "value": [
-      { "label": "Africa", "value": "af" },
-      { "label": "North America", "value": "na" },
-      { "label": "South America", "value": "sa" },
-      { "label": "Europe", "value": "eu" },
-      { "label": "Asia", "value": "as" }
-      { "label": "Oceania", "value": "oc" }
-      { "label": "Antarctica", "value": "an" }
-    ]
-  }
-}
-----
-
-In this example, form field `value` may only be a `set` that contains a minimum of one value and a maximum of seven
-values.  Because this field does not define an `itemtype` member, the `itemtype` defaults to `string` because the first
-Option's `value` type (in this case `af`) is a `string`.
+If the field `type` is not `set` or `array`, Ion parsers MUST ignore any option where the option value type is not the
+same as the field `type`.
 
 ==== `pattern`
 
@@ -841,7 +822,11 @@ a string and must equal to one of the octet sequences defined in <<Form Field `t
 
 If the `type` member is not present, an Ion parser MUST assume a default `type` of `string` for the field.
 
-An Ion parser MUST validate the `value` member value to ensure it adheres to the specified (or default) type.
+Validating Ion parsers MUST validate the `value` member value to ensure it adheres to the specified (or default) type
+before form submission.
+
+If the `type` member equals `array` or `set`, and the elements in the array or set must conform to a particular
+type and structure, those type constraints may be defined using the `etype` and `eform` members.
 
 Use of this member is OPTIONAL.
 
@@ -849,10 +834,12 @@ Use of this member is OPTIONAL.
 
 The `value` member reflects the value assigned to the field.
 
-If the `type` member exists and does not equal `array` or `set`, the `value` member value MUST conform to the data type
-specified by the `type` member value.
+If the `type` member exists and does not equal `array` or `set`, a non-null field `value` value MUST conform to the data
+type specified by the `type` member value.
 
-If the `type` member exists and is equal to `array` or `set`, the `value` member value MUST be a JSON array.
+If the `type` member exists and is equal to `array` or `set`, a non-null `value` member value MUST be a JSON array.  If
+the elements of the array must conform to a particular type and structure, those type constraints may be defined
+using the `etype` and `eform` members.
 
 Use of this member is OPTIONAL.
 
