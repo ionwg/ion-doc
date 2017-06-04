@@ -1162,7 +1162,7 @@ conforms to the specified `etype` (and any valid associated `eform` structure) b
 
 Use of this member is OPTIONAL.
 
-==== `form`
+=== `form`
 
 The `form` member value is either a Form object or a Link to a Form object that reflects the required object structure
 of an Ion Value Object's `value` member. This allows Ion content authors to define complex data/content graphs.
