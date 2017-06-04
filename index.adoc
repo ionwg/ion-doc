@@ -760,7 +760,7 @@ The `max` member value MUST conform to the data type defined by the `type` membe
 any `max` member where the `max` value does not conform to the `type` data type.
 
 The `max` member value may only be defined when the `type` value is equal to `number`, `integer`, `decimal`, `date`,
-`datetime`, `datetimetz`, `time`, or `timetz` as defined in <<Form Field `type` Values, Form Field `type` Values>>.  Ion
+`datetime`, `datetimetz`, `time`, or `timetz` as defined in <<types,Ion Value Object Type Values>>.  Ion
 parsers MUST ignore any `max` member if the `type` member value does not match one of these values.
 
 If the `min` member is present, the `max` value must be greater than or equal to the `min` value.  Ion parsers
@@ -804,7 +804,7 @@ The `min` member value MUST conform to the data type defined by the `type` membe
 any `min` member where the `min` value does not conform to the `type` data type.
 
 The `min` member value may only be defined when the `type` value is `number`, `integer`, `decimal`, `date`,
-`datetime`, `datetimetz`, `time`, or `timetz` as defined in <<Form Field `type` Values, Form Field `type` Values>>.  Ion
+`datetime`, `datetimetz`, `time`, or `timetz` as defined in <<types,Ion Value Object Type Values>>.  Ion
 parsers MUST ignore any `min` member if the `type` member value does not match one of these values.
 
 If the `max` member is present, the `min` value must be less than or equal to the `max` value.  Ion parsers
