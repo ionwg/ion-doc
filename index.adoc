@@ -104,6 +104,10 @@ An _Collection Object_ where the `value` array member contains Form Fields.
 .Linked Form
 A _Form_ that is also a _Link_.  Form data submitted will be sent to the form's `href` resource location.
 
+.File Object
+A _Value Object_ where the `value` member is a Base64URL-encoded byte array that also has `mimetype` and `name` members
+representing file metadata.
+
 === Media Type Name and Version
 
 The Media Type name assigned for Ion content is:
@@ -546,7 +550,7 @@ within the same array.
 [[form-field-members]]
 === Form Field Members
 
-An Ion Form Field has one or more of the following members.
+An Ion Form Field contains one or more of the following members.
 
 ==== `desc`
 
@@ -605,7 +609,7 @@ If the field's `type` member is not equal to `array` or `set`, an Ion parser MUS
 If the `etype` member equals `null` and the `eform` member exists and is a valid Ion form, an Ion parser MUST
 assign the `etype` member a value of `object`.
 
-If the `etype` member does not equal one of the octet sequences <<Form Field `type` Values, Form Field `type` Values>>`,
+If the `etype` member does not equal one of the octet sequences <<Form Field `type` Values, Form Field `type` Values>>,
 an Ion parser MUST ignore the `etype` member.
 
 If the `etype` member is ignored, an Ion parser MUST NOT perform type validation on any value in the field's `value`
@@ -818,7 +822,7 @@ Use of this member is OPTIONAL.
 ==== `type`
 
 The `type` member specifies the mandatory data type that the `value` member value must adhere to.  The `type` value is
-a string and must equal to one of the octet sequences defined in <<Form Field `type` Values, Form Field `type` Values>>.
+a string and must equal to one of the octet sequences defined in <<types,Ion data type>>.
 
 If the `type` member is not present, an Ion parser MUST assume a default `type` of `string` for the field.
 
@@ -857,115 +861,6 @@ If a field should be considered visible, it is RECOMMENDED to omit the `visible`
 
 Use of this member is OPTIONAL.
 
-[[form-field-type-values]]
-=== Form Field `type` Values
-
-A Form Field `type` member value MUST equal one of the following string literal values.
-
-==== `array`
-
-A non-null field `value` must be a JSON array.
-
-If an `array` field also contains `min`, `minlength`, `max`, `maxlength` or `pattern` members, those
-members' validation rules apply to each item in the array, not the array itself.
-
-If an `array` field also declares an `options` member, the array MUST NOT contain any value that does not appear in a
-nested `option` `value` member.
-
-==== `binary`
-
-A non-null field `value` must be a JSON string that is a `base64Url`-encoded octet sequence according to https://tools.ietf.org/html/rfc4648#section-5[RFC 4648, Section 5].  The string MUST NOT contain characters that are not in the `base64Url` alphabet.
-
-==== `boolean`
-
-A non-null field `value` must be a JSON boolean.
-
-==== `date`
-
-A non-null field `value` must be a JSON string that conforms to the `full-date` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
-
-==== `datetime`
-
-A non-null field `value` must be a JSON string that conforms to the `date-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
-
-==== `decimal`
-
-A non-null field `value` must be a JSON number that contains a decimal point (aka the Period `.` character, ASCII code 46).
-
-==== `duration`
-
-A non-null field `value` must be a JSON string that conforms to the `duration` grammar defined in https://tools.ietf.org/html/rfc3339#appendix-A[RFC 3339 Appendix A].
-
-==== `email`
-
-A non-null field `value` must be a JSON string that is also a valid email address as defined in https://www.ietf.org/rfc/rfc2822.txt[RFC 2822, Section 3.4].
-
-==== `integer`
-
-A non-null field `value` must be a JSON number that does not contain a decimal point (aka the Period `.` character, ASCII code 46).
-
-==== `iri`
-
-A non-null field `value` must be a JSON string that is a validly-formed Internationalized Resource Identifier (IRI) as defined by https://tools.ietf.org/html/rfc3987[RFC 3987].
-
-==== `link`
-
-A non-null `value` must be an Ion Link.
-
-==== `number`
-
-A non-null `value` must be a JSON number.
-
-==== `object`
-
-A non-null `value` must be a JSON object.
-
-If the field has a `form` member, the field `value` JSON object MUST be the JSON representation that would result if
-submitting that form.
-
-==== `pdatetime`
-
-A non-null field `value` must be a partial datetime (a datetime without a timezone) which is a JSON string that
-conforms to the following https://tools.ietf.org/html/rfc5234[ABNF] grammar:
-
-    pdatetime = full-date "T" partial-time
-
-where `full-date` and `partial-time` are defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
-
-To avoid potential logic inconsistencies across heterogeneous systems, it is RECOMMENDED to use `datetime` instead of `pdatetime` when possible.
-
-==== `ptime`
-
-A non-null field `value` must be a partial time (a time without a timezone) which is a JSON string that conforms to
-the `partial-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
-
-To avoid potential logic inconsistencies across heterogeneous systems, it is RECOMMENDED to use `time` instead of `ptime` when possible.
-
-==== `set`
-
-The field `value` must be a JSON array and the array MUST NOT contain any element that is equal to any other
-element within the same array, where element equality is defined in Appendix A.
-
-If a `set` field also contains `min`, `minlength`, `max`, `maxlength` or `pattern` members, those
-members' validation rules apply to each item in the set array, not the set array itself.
-
-If a `set` field also declares an `options` member, the set array MUST NOT contain any value that does not appear in a
-nested `option` `value` member.
-
-==== `string`
-
-A non-null field `value` must be a JSON string.
-
-==== `time`
-
-A non-null field `value` must be a JSON string that conforms to the `full-time` grammar defined in
-https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
-
-==== `url`
-
-A non-null field `value` must be a JSON string that is a validly-formed Uniform Resource Locator (URL) as defined by
-https://tools.ietf.org/html/rfc3986#section-1.1.3[RFC 3986 Section 1.1.3].
-
 [[form-field-option-members]]
 === Form Field Option Members
 
@@ -998,6 +893,7 @@ applied to the containing Form Field's `value` member.
 
 Use of this member is REQUIRED.
 
+[[form-submission]]
 === Form Submission
 
 When a form is submitted to a linked resource location, the form's data will be serialized to a JSON object named
@@ -1046,7 +942,7 @@ Consider the following non-normative example form:
 }
 ----
 
-The corresponding Form Submission Object for this form is:
+The corresponding Form Submission Object for this form might look like this:
 
 .Example Form Submission Object
 [source,json]
@@ -1100,12 +996,184 @@ Content-Type: application/json
 }
 ----
 
+[[files]]
+== Files
+
+File interchange between machines often requires metadata in addition to file contents.
+
+An Ion File Object is a _Value Object_ that represents a file's contents and its associated metadata.
+
+[[file-structure]]
+=== File Object Structure
+
+Ion parsers MUST identify any JSON object as an Ion File Object if the object contains:
+
+1. a non-null `name` string member.
+2. a non-null `mediatype` string member that equals a syntactically valid https://tools.ietf.org/html/rfc6838[Media Type] string value.
+3. a non-null `value` string member that is a `base64Url`-encoded octet sequence according to
+   https://tools.ietf.org/html/rfc4648#section-5[RFC 4648, Section 5].  The string MAY be the empty string to indicate
+   a file of zero length.  A non-empty string MUST NOT contain characters that are not in the `base64Url` alphabet.
+4. either a `type` member equal to the octet sequence `file` or the object is in a Collection Object's
+   `value` array and the Collection Object has an `etype` member with a value equal to the octet sequence `file`.
+
+Ion parsers MUST NOT identify a JSON object as an Ion File Object if the object does not match the above conditions.
+
+If the Ion File Object is contained within an Ion Collection Object's `value` array and the Collection Object has a
+member named `etype` with a value equal to the octet sequence `file`, it is RECOMMENDED to omit the `type` member in
+each object/element in the array to reduce verbosity.
+
+A non-normative example of one file:
+
+[source,json]
+----
+{
+  "type": "file",
+  "name": "hello.txt",
+  "mediatype": "text/plain",
+  "value": "SGVsbG8gd29ybGQ="
+}
+----
+
+Because this file object is not an element within a Collection Object, the `type` member is required.
+
+A non-normative example of more than one file within a Collection Object:
+
+[source,json]
+----
+{
+  "etype": "file",
+  "value": [
+    {
+      "name": "hello.txt",
+      "mediatype": "text/plain",
+      "value": "SGVsbG8gd29ybGQ="
+    },
+    {
+      "name": "hello2.txt",
+      "mediatype": "text/plain",
+      "value": "SG93IGFyZSB5b3UgdG9kYXk_"
+    }
+  ]
+}
+----
+
+Because these two file objects are elements within a Collection Object that has an `etype` member, each element/object
+does not need to have a `type` member.
+
+[[file-members]]
+=== File Object Members
+
+An Ion File Object contains one or more of the following members.
+
+==== `mediatype`
+
+The `mediatype` member is a JSON string that is equals a syntactically valid https://tools.ietf.org/html/rfc6838[Media Type] string value.
+
+The `mediatype` member MUST NOT be null.
+
+The use of this member is REQUIRED.
+
+==== `name`
+
+The `name` member is the string name of the file. This value is the unqualified file name, without path information.
+
+The `name` member MUST NOT be null. If the file name cannot be determined or represented, the blank string must be used.
+
+The use of this member is REQUIRED.
+
+==== `type`
+
+The `type` member represents the type of Ion object encountered.  For Ion File Objects, this member, if present, MUST
+equal the octet sequence `file`.
+
+If the Ion File Object exists as an element within a Collection Object's `value` array and the Collection Object has a
+`etype` member equal to the octet sequence `file`, this member is OPTIONAL.
+
+Otherwise, the use of this member in an Ion File Object is REQUIRED.
+
+==== `value`
+
+The `value` member value is a `base64Url`-encoded octet sequence according to
+https://tools.ietf.org/html/rfc4648#section-5[RFC 4648, Section 5].  The string MAY be the empty string to indicate
+a file of zero length.
+
+The `value` member MUST NOT equal `null`.
+
+The `value` MAY equal the empty string to indicate a file of zero length.
+
+A non-empty `value` MUST NOT contain characters that are not in the `base64Url` alphabet.
+
+The use of this member is REQUIRED.
+
 == Registered Ion Object Member Names
 
 The following member names are registered in the IANA Ion Object Member Registry
 defined in [TBD].  None of the members defined below are intended to be mandatory
 in all cases, but rather, provide an initial set likely to be useful for common
 use cases.
+
+=== `eform`
+
+The `eform` member value is either a Form object or a Link to a Form object that specifies the required object structure
+of each element in an Ion Collection Object's `value` array.  The name "eform" is short for "element form".
+
+If the object is not an Ion Collection Object, or if the object is an Ion Form Field with a `type` member that does
+not equal `array` or `set`, an Ion parser MUST ignore the object's `eform` member.
+
+If the `eform` member equals `null`, an Ion parser MUST ignore the `eform` member.
+
+If the `eform` member is not a valid Ion Form object, an Ion parser MUST ignore the `eform` member.
+
+If the `eform` member exists and is valid, and the `etype` member does not exist or equals `null`, an Ion parser MUST
+assign the object an `etype` member with a value of `object`.
+
+If the `etype` member does not equal `object`, an Ion parser MUST ignore the `eform` member.
+
+If the `eform` member is a Link or a Linked Form, Ion parsers MUST NOT submit data to the `eform` value's linked
+`href` location.  The eform `href` location may only be used to read the associated form to
+determine the structure of the associated form object.
+
+If the `eform` member is contained in an Ion Form Field, and it has been determined that the `eform` member should be
+evaluated according to these rules, a validating user agent MUST ensure each element in the field's `value` array
+conforms to the specified `eform` form structure before form submission.
+
+Use of this member is OPTIONAL.
+
+=== `etype`
+
+The `etype` member specifies the mandatory data type of each element in an Ion Collection Object's `value` array.
+The name "etype" is short for "element type".
+
+If the object is not an Ion Collection Object, or if the object is an Ion Form Field with a `type` member that
+does not equal `array` or `set`, an Ion parser MUST ignore the object's `etype` member.
+
+If the `etype` member equals `null` and the `eform` member exists and is a valid Ion form, an Ion parser MUST
+assign the `etype` member a value of `object`.
+
+If the `etype` member does not equal one of the octet sequences <<Form Field `type` Values, Form Field `type` Values>>,
+an Ion parser MUST ignore the `etype` member.
+
+If the `etype` member is contained in an Ion Form Field, and the `etype` member has been ignored, an Ion parser MUST NOT
+perform type validation on any value in the object's `value` array before form submission.
+
+If the `etype` member is contained in an Ion Form Field, and it has been determined that the `etype` member should be
+evaluated according to these rules, a validating user agent MUST ensure each element in the object's `value` array
+conforms to the specified `etype` (and any valid associated `eform` structure) before before form submission.
+
+Use of this member is OPTIONAL.
+
+==== `form`
+
+The `form` member value is either a Form object or a Link to a Form object that reflects the required object structure
+of an Ion Value Object's `value` member. This allows Ion content authors to define complex data/content graphs.
+
+If the Ion Value Object that contains the `form` member is a descendent of an Ion Linked Form, Ion parsers MUST NOT
+submit data to the current `form` value's linked `href` location.  The form's `href` location may only be used to
+read the associated form to determine the structure of the associated value object.
+
+Where a Form contains nested Forms in this manner, the resulting collected data will form an object graph.  This
+data/graph may only be submitted to the top-most Ion Linked Form's `href` location; Ion parsers MUST NOT submit data to
+any nested descendant Form's linked resource location.
 
 === `href`
 
@@ -1152,6 +1220,142 @@ Use of this member is OPTIONAL.
 
 A _Link_ to a _Ion Collection_ SHOULD contain a `rel` member that has at least the `collection` relation specified.
 
+=== `type`
+
+The `type` member represents the <<types,Ion data type>> that MUST be represented in the associated object's `value` member.
+
+Use of this member is OPTIONAL.
+
+=== `value`
+
+The `value` member indicates that the enclosing object exists to represent a primary JSON value and other
+members of the object exist to help describe the primary value.
+
+Use of this member is OPTIONAL.
+
+[[types]]
+== Registered Ion Value Object Type Values
+
+The following `type` member values are registered in the IANA Ion Object Type Registry
+defined in [TBD].  None of the members defined below are intended to be mandatory
+in all cases, but rather, provide an initial set likely to be useful for common
+use cases.
+
+Other `type` values MAY exist.  An Ion parser MUST ignore any type values it does not support.
+
+=== `array`
+
+A non-null value must be a JSON array.
+
+If an Ion Value Object has an `array` type and the Ion Value Object also contains `min`, `minlength`, `max`,
+`maxlength` or `pattern` members, those members' validation rules apply to each element in the `value` array, not the
+array itself.
+
+If an Ion Value Object with an `array` type also declares an `options` member, the `value` array MUST NOT contain any
+value that does not appear in a nested `option` `value` member.
+
+=== `binary`
+
+A non-null value must be a JSON string that is a `base64Url`-encoded octet sequence according to
+https://tools.ietf.org/html/rfc4648#section-5[RFC 4648, Section 5].  The string MUST NOT contain characters that
+are not in the `base64Url` alphabet.
+
+=== `boolean`
+
+A non-null value must be a JSON boolean.
+
+=== `date`
+
+A non-null value must be a JSON string that conforms to the `full-date` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
+
+=== `datetime`
+
+A non-null value must be a JSON string that conforms to the `date-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
+
+=== `decimal`
+
+A non-null value must be a JSON number that contains a decimal point (aka the Period `.` character, ASCII code 46).
+
+=== `duration`
+
+A non-null value must be a JSON string that conforms to the `duration` grammar defined in https://tools.ietf.org/html/rfc3339#appendix-A[RFC 3339 Appendix A].
+
+=== `email`
+
+A non-null value must be a JSON string that is also a valid email address as defined in https://www.ietf.org/rfc/rfc2822.txt[RFC 2822, Section 3.4].
+
+=== `file`
+
+A non-null value must be an <<files,Ion File Object>>.
+
+=== `integer`
+
+A non-null value must be a JSON number that does not contain a decimal point (aka the Period `.` character, ASCII code 46).
+
+=== `iri`
+
+A non-null value must be a JSON string that is a validly-formed Internationalized Resource Identifier (IRI) as defined by https://tools.ietf.org/html/rfc3987[RFC 3987].
+
+=== `link`
+
+A non-null value must be an Ion Link.
+
+=== `number`
+
+A non-null value must be a JSON number.
+
+=== `object`
+
+A non-null value must be a JSON object.
+
+If an Ion Value Object with a `type` of `object` also contains a `form` member, the Ion Value Object's `value` member
+MUST be the <<form-submission,Form Submission Object>> that would result if submitting that form.
+
+=== `pdatetime`
+
+A non-null value must be a partial datetime (a datetime without a timezone) which is a JSON string that
+conforms to the following https://tools.ietf.org/html/rfc5234[ABNF] grammar:
+
+    pdatetime = full-date "T" partial-time
+
+where `full-date` and `partial-time` are defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
+
+To avoid potential logic inconsistencies across heterogeneous systems, it is RECOMMENDED to use `datetime` instead of
+`pdatetime` when possible.
+
+=== `ptime`
+
+A non-null value must be a partial time (a time without a timezone) which is a JSON string that conforms to
+the `partial-time` grammar defined in https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
+
+To avoid potential logic inconsistencies across heterogeneous systems, it is RECOMMENDED to use `time` instead of
+`ptime` when possible.
+
+=== `set`
+
+A non-null value must be a JSON array and the array MUST NOT contain any element that is equal to any other
+element within the same array, where element equality is defined in Appendix A.
+
+If an Ion Value Object has a `set` type and also contains `min`, `minlength`, `max`, `maxlength` or `pattern` members,
+those members' validation rules apply to each item in the set array, not the set array itself.
+
+If an Ion Value Object with an `set` type also declares an `options` member, the `value` set array MUST NOT contain any
+value that does not appear in a nested `option` `value` member.
+
+=== `string`
+
+A non-null value must be a JSON string.
+
+=== `time`
+
+A non-null value must be a JSON string that conforms to the `full-time` grammar defined in
+https://tools.ietf.org/html/rfc3339#section-5.6[RFC 3339 Section 5.6].
+
+=== `url`
+
+A non-null value must be a JSON string that is a validly-formed Uniform Resource Locator (URL) as defined by
+https://tools.ietf.org/html/rfc3986#section-1.1.3[RFC 3986 Section 1.1.3].
+
 == IANA Considerations
 
 === Ion Object Member Registry
@@ -1159,7 +1363,7 @@ A _Link_ to a _Ion Collection_ SHOULD contain a `rel` member that has at least t
 This specification establishes the IANA Ion Object Member Registry for Ion
 Object Member Names.  The registry records the Member Name and a reference to
 the specification that defines it.  This specification registers the Member Names
-defined in Section 6.
+defined in Section 7.
 
 Values are registered on a
 {uri-IANA-consideration-guidelines}[specification required] (RFC 5226) basis
@@ -1214,6 +1418,77 @@ exception in this particular case.
 
 .Member Description
 Brief description of the Member (e.g., "Resource target IRI location").
+
+.Change Controller:
+For Standards Track RFCs, state "IESG".  For others, give the name of the
+responsible party.  Other details (e.g., postal address, email address, home
+page URI) may also be included.
+
+.Specification Document(s):
+Reference to the document(s) that specify the parameter, preferably including
+URI(s) that can be used to retrieve copies of the document(s).  An indication
+of the relevant sections may also be included but is not required.
+
+=== Ion Value Object Type Registry
+
+This specification establishes the IANA Ion Value Object Type Registry for Ion
+Value Object Type Names.  The registry records the Type Name and a reference to
+the specification that defines it.  This specification registers the Type Names
+defined in Section 8.
+
+Values are registered on a
+{uri-IANA-consideration-guidelines}[specification required] (RFC 5226) basis
+after a review period on the Ion Working Group (IWG)
+https://github.com/ionwg/ion-doc[ion-doc GitHub repository], on the advice of
+one or more Designated Experts. However, to allow
+for the allocation of values prior to publication, the Designated Expert(s) may
+approve registration once they are satisfied that such a specification will be
+published.
+
+Registration requests must filed as an
+https://github.com/ionwg/ion-doc/issues[ion-doc GitHub issue] for review and
+comment, with an appropriate subject (e.g., "Request to register value object
+member: example").
+
+Within the review period, the Designated Expert(s) will either approve or deny
+the registration request, communicating this decision by closing the issue.
+Denials should include an explanation and, if applicable, suggestions as to
+how to make the request successful.  Registration requests that are undetermined
+for a period longer than 21 days can be brought to the IWG's attention using
+@mentions in a new comment appended to the GitHub issue for resolution.
+
+Criteria that should be applied by the Designated Expert(s) includes determining
+whether the proposed registration duplicates existing functionality, determining
+whether it is likely to be of general applicability or whether it is useful only
+for a single application, and whether the registration description is clear.
+
+IANA must only accept registry updates from the Designated Expert(s) and should
+direct all requests for registration to the https://github.com/ionwg/ion-doc/issues[Ion issue tracker].
+
+It is suggested that multiple Designated Experts be appointed who are able to
+represent the perspectives of different applications using this specification,
+in order to enable broadly-informed review of registration decisions.  In cases
+where a registration decision could be perceived as creating a conflict of
+interest for a particular Expert, that Expert should defer to the judgment of
+the other Expert(s).
+
+Proposed registry description information:
+
+* Protocol Category: Ion
+* Registry Location: http://www.iana.org/assignments/ion
+* Webpage Title: Ion
+* Registry Name: Ion Value Object Types
+
+==== Registration Template
+
+.Member Name:
+The type requested (e.g., "integer"). This name is case-sensitive.  Names may not
+match other registered names in a case-insensitive manner unless the
+Designated Expert(s) state that there is a compelling reason to allow an
+exception in this particular case.
+
+.Member Description
+Brief description of the Member (e.g., "JSON number without a decimal point character.").
 
 .Change Controller:
 For Standards Track RFCs, state "IESG".  For others, give the name of the
