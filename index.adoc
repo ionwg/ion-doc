@@ -375,6 +375,115 @@ represent additional contextual information that might be relevant to user agent
 In this example, the `greeting` member transitively reflects reflects a value of `Hola` through the presence of
 a _Value Object_.
 
+[[files]]
+== Files
+
+File interchange between machines often requires metadata in addition to file contents.
+
+An Ion File Object is a _Value Object_ that represents a file's contents and its associated metadata.
+
+[[file-structure]]
+=== File Object Structure
+
+Ion parsers MUST identify any JSON object as an Ion File Object if the object contains:
+
+1. a non-null `name` string member.
+2. a non-null `mediatype` string member that equals a syntactically valid https://tools.ietf.org/html/rfc6838[Media Type] string value.
+3. a non-null `value` string member that is a `base64Url`-encoded octet sequence according to
+   https://tools.ietf.org/html/rfc4648#section-5[RFC 4648, Section 5].  The string MAY be the empty string to indicate
+   a file of zero length.  A non-empty string MUST NOT contain characters that are not in the `base64Url` alphabet.
+4. either a `type` member equal to the octet sequence `file` or the object is in a Collection Object's
+   `value` array and the Collection Object has an `etype` member with a value equal to the octet sequence `file`.
+
+Ion parsers MUST NOT identify a JSON object as an Ion File Object if the object does not match the above conditions.
+
+If the Ion File Object is contained within an Ion Collection Object's `value` array and the Collection Object has a
+member named `etype` with a value equal to the octet sequence `file`, it is RECOMMENDED to omit the `type` member in
+each object/element in the array to reduce verbosity.
+
+A non-normative example of one file:
+
+[source,json]
+----
+{
+  "type": "file",
+  "name": "hello.txt",
+  "mediatype": "text/plain",
+  "value": "SGVsbG8gd29ybGQ="
+}
+----
+
+Because this file object is not an element within a Collection Object, the `type` member is required.
+
+A non-normative example of more than one file within a Collection Object:
+
+[source,json]
+----
+{
+  "etype": "file",
+  "value": [
+    {
+      "name": "hello.txt",
+      "mediatype": "text/plain",
+      "value": "SGVsbG8gd29ybGQ="
+    },
+    {
+      "name": "hello2.txt",
+      "mediatype": "text/plain",
+      "value": "SG93IGFyZSB5b3UgdG9kYXk_"
+    }
+  ]
+}
+----
+
+Because these two file objects are elements within a Collection Object that has an `etype` member, each element/object
+does not need to have a `type` member.
+
+[[file-members]]
+=== File Object Members
+
+An Ion File Object contains one or more of the following members.
+
+==== `mediatype`
+
+The `mediatype` member is a JSON string that is equals a syntactically valid https://tools.ietf.org/html/rfc6838[Media Type] string value.
+
+The `mediatype` member MUST NOT be null.
+
+The use of this member is REQUIRED.
+
+==== `name`
+
+The `name` member is the string name of the file. This value is the unqualified file name, without path information.
+
+The `name` member MUST NOT be null. If the file name cannot be determined or represented, the blank string must be used.
+
+The use of this member is REQUIRED.
+
+==== `type`
+
+The `type` member represents the type of Ion object encountered.  For Ion File Objects, this member, if present, MUST
+equal the octet sequence `file`.
+
+If the Ion File Object exists as an element within a Collection Object's `value` array and the Collection Object has a
+`etype` member equal to the octet sequence `file`, this member is OPTIONAL.
+
+Otherwise, the use of this member in an Ion File Object is REQUIRED.
+
+==== `value`
+
+The `value` member value is a `base64Url`-encoded octet sequence according to
+https://tools.ietf.org/html/rfc4648#section-5[RFC 4648, Section 5].  The string MAY be the empty string to indicate
+a file of zero length.
+
+The `value` member MUST NOT equal `null`.
+
+The `value` MAY equal the empty string to indicate a file of zero length.
+
+A non-empty `value` MUST NOT contain characters that are not in the `base64Url` alphabet.
+
+The use of this member is REQUIRED.
+
 [[links]]
 == Links
 
@@ -995,115 +1104,6 @@ Content-Type: application/json
   }
 }
 ----
-
-[[files]]
-== Files
-
-File interchange between machines often requires metadata in addition to file contents.
-
-An Ion File Object is a _Value Object_ that represents a file's contents and its associated metadata.
-
-[[file-structure]]
-=== File Object Structure
-
-Ion parsers MUST identify any JSON object as an Ion File Object if the object contains:
-
-1. a non-null `name` string member.
-2. a non-null `mediatype` string member that equals a syntactically valid https://tools.ietf.org/html/rfc6838[Media Type] string value.
-3. a non-null `value` string member that is a `base64Url`-encoded octet sequence according to
-   https://tools.ietf.org/html/rfc4648#section-5[RFC 4648, Section 5].  The string MAY be the empty string to indicate
-   a file of zero length.  A non-empty string MUST NOT contain characters that are not in the `base64Url` alphabet.
-4. either a `type` member equal to the octet sequence `file` or the object is in a Collection Object's
-   `value` array and the Collection Object has an `etype` member with a value equal to the octet sequence `file`.
-
-Ion parsers MUST NOT identify a JSON object as an Ion File Object if the object does not match the above conditions.
-
-If the Ion File Object is contained within an Ion Collection Object's `value` array and the Collection Object has a
-member named `etype` with a value equal to the octet sequence `file`, it is RECOMMENDED to omit the `type` member in
-each object/element in the array to reduce verbosity.
-
-A non-normative example of one file:
-
-[source,json]
-----
-{
-  "type": "file",
-  "name": "hello.txt",
-  "mediatype": "text/plain",
-  "value": "SGVsbG8gd29ybGQ="
-}
-----
-
-Because this file object is not an element within a Collection Object, the `type` member is required.
-
-A non-normative example of more than one file within a Collection Object:
-
-[source,json]
-----
-{
-  "etype": "file",
-  "value": [
-    {
-      "name": "hello.txt",
-      "mediatype": "text/plain",
-      "value": "SGVsbG8gd29ybGQ="
-    },
-    {
-      "name": "hello2.txt",
-      "mediatype": "text/plain",
-      "value": "SG93IGFyZSB5b3UgdG9kYXk_"
-    }
-  ]
-}
-----
-
-Because these two file objects are elements within a Collection Object that has an `etype` member, each element/object
-does not need to have a `type` member.
-
-[[file-members]]
-=== File Object Members
-
-An Ion File Object contains one or more of the following members.
-
-==== `mediatype`
-
-The `mediatype` member is a JSON string that is equals a syntactically valid https://tools.ietf.org/html/rfc6838[Media Type] string value.
-
-The `mediatype` member MUST NOT be null.
-
-The use of this member is REQUIRED.
-
-==== `name`
-
-The `name` member is the string name of the file. This value is the unqualified file name, without path information.
-
-The `name` member MUST NOT be null. If the file name cannot be determined or represented, the blank string must be used.
-
-The use of this member is REQUIRED.
-
-==== `type`
-
-The `type` member represents the type of Ion object encountered.  For Ion File Objects, this member, if present, MUST
-equal the octet sequence `file`.
-
-If the Ion File Object exists as an element within a Collection Object's `value` array and the Collection Object has a
-`etype` member equal to the octet sequence `file`, this member is OPTIONAL.
-
-Otherwise, the use of this member in an Ion File Object is REQUIRED.
-
-==== `value`
-
-The `value` member value is a `base64Url`-encoded octet sequence according to
-https://tools.ietf.org/html/rfc4648#section-5[RFC 4648, Section 5].  The string MAY be the empty string to indicate
-a file of zero length.
-
-The `value` member MUST NOT equal `null`.
-
-The `value` MAY equal the empty string to indicate a file of zero length.
-
-A non-empty `value` MUST NOT contain characters that are not in the `base64Url` alphabet.
-
-The use of this member is REQUIRED.
 
 == Registered Ion Object Member Names
 
