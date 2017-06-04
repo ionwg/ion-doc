@@ -718,7 +718,7 @@ If the field's `type` member is not equal to `array` or `set`, an Ion parser MUS
 If the `etype` member equals `null` and the `eform` member exists and is a valid Ion form, an Ion parser MUST
 assign the `etype` member a value of `object`.
 
-If the `etype` member does not equal one of the octet sequences <<Form Field `type` Values, Form Field `type` Values>>,
+If the `etype` member does not equal one of the octet sequences <<types,Ion Value Object Type Values>>,
 an Ion parser MUST ignore the `etype` member.
 
 If the `etype` member is ignored, an Ion parser MUST NOT perform type validation on any value in the field's `value`
