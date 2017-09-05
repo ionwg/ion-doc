@@ -127,7 +127,7 @@ All following examples are non-normative.
 
 ==== Example Objects
 
-JSON objects are parsed as as expected:
+JSON objects are parsed as is expected:
 
 .Example JSON Object
 [source,json]
